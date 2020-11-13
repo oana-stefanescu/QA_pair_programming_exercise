@@ -1,6 +1,7 @@
 .PHONY: venv serve docker_rm docker_rmi docker_clean build docker_serve
 
 VENV_PIP=./venv/bin/pip
+VENV_UVICORN=./venv/bin/uvicorn
 BI_PYPI=https://repo2.rz.adition.net/repository/bi-pipy/simple/
 DOCKER_IMAGE:=partitioning-service
 DOCKER_CONTAINER:=partitioning-service
@@ -13,8 +14,7 @@ venv:
 	$(VENV_PIP) install --index-url $(BI_PYPI) -r requirements.txt
 
 serve: venv
-	. ./venv/bin/activate
-	uvicorn app.main:app --reload --port $(PORT) --host 0.0.0.0 --log-level debug
+	$(VENV_UVICORN) app.main:app --reload --port $(PORT) --host 0.0.0.0 --log-level debug
 
 docker_rm:
 	docker rm -f -v $(DOCKER_CONTAINER) || true
