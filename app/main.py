@@ -10,4 +10,4 @@ def root():
 
 @app.get("/dummy")
 def dummy():
-    return {"This is": "a dummy endpoint"}
+    return {"hello": "dummy endpoint"}
