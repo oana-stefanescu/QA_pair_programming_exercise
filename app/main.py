@@ -1,7 +1,9 @@
 import logging
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.logger import logger
+from prometheus_client import multiprocess
+from prometheus_client import generate_latest, CollectorRegistry, CONTENT_TYPE_LATEST
 
 # make sure logging is also available in production
 # see <https://github.com/tiangolo/uvicorn-gunicorn-fastapi-docker/issues/19>
@@ -14,6 +16,17 @@ else:
     logger.setLevel(logging.DEBUG)
 
 app = FastAPI()
+
+
+# This add the prometheus metrics endpoint (in multiprocess mode)
+# See <https://github.com/prometheus/client_python/#multiprocess-mode-gunicorn>
+@app.get('/metrics')
+def metrics():
+    registry = CollectorRegistry()
+    multiprocess.MultiProcessCollector(registry)
+    data = generate_latest(registry)
+    headers = {'Content-Length': str(len(data))}
+    return Response(data, media_type=CONTENT_TYPE_LATEST, headers=headers)
 
 
 @app.get("/")
