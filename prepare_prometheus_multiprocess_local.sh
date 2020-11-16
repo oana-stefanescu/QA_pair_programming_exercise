@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# This script runs the API locally
-# It also sets up the multiprocessing engine for prometheus correctly
+# This script sets up the multiprocessing engine for prometheus correctly
 
 if [[ -z "${1}" ]]
 then

@@ -13,7 +13,8 @@ venv:
 	$(VENV_PIP) install setuptools -U
 	$(VENV_PIP) install --index-url $(BI_PYPI) -r requirements.txt
 
-serve: venv
+serve:
+	./prepare_prometheus_multiprocess_local.sh
 	$(VENV_UVICORN) app.main:app --reload --port $(PORT) --host 0.0.0.0 --log-level debug
 
 docker_rm:
