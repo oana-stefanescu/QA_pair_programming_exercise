@@ -16,5 +16,3 @@ fi
 # cleanup the prometheus-tmp dir
 rm -rf "${prometheus_multiproc_dir}/*"
 printf "prometheus_multiproc_dir (\"%s\") has been wiped clean\n" "${prometheus_multiproc_dir}"
-
-cat /gunicorn_conf.py
