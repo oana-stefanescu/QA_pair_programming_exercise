@@ -14,5 +14,7 @@ if [ ! -d "${prometheus_multiproc_dir}" ]; then
 fi
 
 # cleanup the prometheus-tmp dir
-rm -rf "${prometheus_multiproc_dir}/*"
+for f in "${prometheus_multiproc_dir}"/*; do
+    rm -rf "${f}"
+done
 printf "prometheus_multiproc_dir (\"%s\") has been wiped clean\n" "${prometheus_multiproc_dir}"
