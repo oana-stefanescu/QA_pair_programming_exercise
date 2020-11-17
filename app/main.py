@@ -48,10 +48,3 @@ def root():
 def dummy():
     return {"hello": "dummy endpoint"}
 
-
-@app.get('/sleepy')
-def sleepy():
-    import time
-    from datetime import datetime
-    time.sleep(10)
-    return {'time': datetime.now()}
