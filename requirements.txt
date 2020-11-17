@@ -1,4 +1,6 @@
 fastapi==0.61.2
 uvicorn==0.12.2
-prometheus_client>=0.8.0
-prometheusrock>=0.1.1
+# note that version 0.9.0 is available, but prometheus-fastapi-instrumentator requires <0.9.0.
+# we should watch for updates to keep everything as up-too-date as possible
+prometheus_client<0.9.0,>=0.8.0
+prometheus-fastapi-instrumentator>=5.5.1

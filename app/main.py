@@ -4,7 +4,8 @@ from fastapi import FastAPI, Response
 from fastapi.logger import logger
 from prometheus_client import multiprocess
 from prometheus_client import generate_latest, CollectorRegistry, CONTENT_TYPE_LATEST
-from prometheusrock import PrometheusMiddleware
+from prometheus_fastapi_instrumentator import Instrumentator
+
 
 APP_NAME = 'Partitioning Service'
 
@@ -20,13 +21,11 @@ else:
 
 app = FastAPI(title=APP_NAME)
 
-# add app middleware(s)
-app.add_middleware(
-    PrometheusMiddleware,
-    app_name=APP_NAME,
-    remove_labels=['headers', 'method'],
-    skip_paths=['/metrics'],
+# create an instrumentator to expose metrics to prometheus
+instrumentator = Instrumentator(
+    excluded_handlers=["/metrics"],
 )
+instrumentator.instrument(app)
 
 
 # This add the prometheus metrics endpoint (in multiprocess mode)
@@ -48,3 +47,11 @@ def root():
 @app.get("/dummy")
 def dummy():
     return {"hello": "dummy endpoint"}
+
+
+@app.get('/sleepy')
+def sleepy():
+    import time
+    from datetime import datetime
+    time.sleep(10)
+    return {'time': datetime.now()}
