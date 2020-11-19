@@ -1,10 +1,10 @@
 import logging
 
-from fastapi import FastAPI, Response
+from fastapi import FastAPI
 from fastapi.logger import logger
-from prometheus_client import multiprocess
-from prometheus_client import generate_latest, CollectorRegistry, CONTENT_TYPE_LATEST
 from prometheus_fastapi_instrumentator import Instrumentator
+
+from .routers import metrics
 
 
 APP_NAME = 'Partitioning Service'
@@ -27,16 +27,12 @@ instrumentator = Instrumentator(
 )
 instrumentator.instrument(app)
 
-
-# This adds the prometheus metrics endpoint (in multiprocess mode)
-# See <https://github.com/prometheus/client_python/#multiprocess-mode-gunicorn>
-@app.get('/metrics')
-def metrics():
-    registry = CollectorRegistry()
-    multiprocess.MultiProcessCollector(registry)
-    data = generate_latest(registry)
-    headers = {'Content-Length': str(len(data))}
-    return Response(data, media_type=CONTENT_TYPE_LATEST, headers=headers)
+# add routers
+app.include_router(
+    metrics.router,
+    prefix='/metrics',
+    tags=['prometheus']
+)
 
 
 @app.get("/")
