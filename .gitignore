@@ -1,5 +1,7 @@
 # IDE
 /.idea
+# tmp directory used for prometheus multiprocess
+/prometheus-tmp
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
