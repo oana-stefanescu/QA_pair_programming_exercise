@@ -43,4 +43,3 @@ def root():
 @app.get("/dummy")
 def dummy():
     return {"hello": "dummy endpoint"}
-

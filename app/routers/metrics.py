@@ -14,4 +14,3 @@ def metrics():
     data = generate_latest(registry)
     headers = {'Content-Length': str(len(data))}
     return Response(data, media_type=CONTENT_TYPE_LATEST, headers=headers)
-
