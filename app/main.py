@@ -28,7 +28,7 @@ instrumentator = Instrumentator(
 instrumentator.instrument(app)
 
 
-# This add the prometheus metrics endpoint (in multiprocess mode)
+# This adds the prometheus metrics endpoint (in multiprocess mode)
 # See <https://github.com/prometheus/client_python/#multiprocess-mode-gunicorn>
 @app.get('/metrics')
 def metrics():
