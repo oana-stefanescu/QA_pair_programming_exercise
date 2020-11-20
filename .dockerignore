@@ -1,0 +1,22 @@
+# IDE
+/.idea
+# tmp directory used for prometheus multiprocess
+/prometheus-tmp
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+.tox
+.coverage
+.coverage.*
+.cache
+.git/
+*.log
+.idea/
+build/
+.coveragerc
+dist/
+pytest.cache/
+spark-warehouse/
