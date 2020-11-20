@@ -5,7 +5,9 @@ VENV_UVICORN=./venv/bin/uvicorn
 BI_PYPI=https://repo2.rz.adition.net/repository/bi-pipy/simple/
 DOCKER_IMAGE:=partitioning-service
 DOCKER_CONTAINER:=partitioning-service
-PORT:=5000
+HOST:=localhost
+PORT:=8080
+PROMETHEUS_MULTIPROC_DIR:=./prometheus-tmp
 
 venv:
 	python3 -m venv ./venv
@@ -13,8 +15,9 @@ venv:
 	$(VENV_PIP) install setuptools -U
 	$(VENV_PIP) install --index-url $(BI_PYPI) -r requirements.txt
 
-serve: venv
-	$(VENV_UVICORN) app.main:app --reload --port $(PORT) --host 0.0.0.0 --log-level debug
+serve:
+	./prepare_prometheus_multiprocess_local.sh
+	env prometheus_multiproc_dir="$(PROMETHEUS_MULTIPROC_DIR)" $(VENV_UVICORN) app.main:app --reload --port $(PORT) --host $(HOST) --log-level debug
 
 docker_rm:
 	docker rm -f -v $(DOCKER_CONTAINER) || true
