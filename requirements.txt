@@ -4,3 +4,5 @@ uvicorn==0.12.2
 # we should watch for updates to keep everything as up-too-date as possible
 prometheus_client<0.9.0,>=0.8.0
 prometheus-fastapi-instrumentator>=5.5.1
+pytest>=6.1.2
+requests>=2.25.0
