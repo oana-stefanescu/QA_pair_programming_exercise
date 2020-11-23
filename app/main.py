@@ -44,8 +44,8 @@ tags_metadata: List[Dict[str, Union[str, Dict[str, str]]]] = [
         'description': 'The prometheus endpoint, returns the prometheus metrics format. It uses the metrics from '
                        'prometheus-fastapi-instrumentator.',
         'externalDocs': {
-            'description': 'prometheus-fastapi-instrumentator',
-            'url': 'https://pypi.org/project/prometheus-fastapi-instrumentator/',
+            'description': 'Exporter documentation',
+            'url': 'https://github.com/trallnag/prometheus-fastapi-instrumentator/',
         }
     }
 ]
