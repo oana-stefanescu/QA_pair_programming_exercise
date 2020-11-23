@@ -1,5 +1,6 @@
 import logging
 import os
+from typing import List, Dict, Union
 
 from fastapi import FastAPI
 from fastapi.logger import logger
@@ -37,7 +38,7 @@ description_file_path: str = os.path.join(app_root, 'app_description.md')
 with open(description_file_path) as description_file:
     description: str = description_file.read()
 
-tags_metadata = [
+tags_metadata: List[Dict[str, Union[str, Dict[str, str]]]] = [
     {
         'name': 'prometheus',
         'description': 'The prometheus endpoint, returns the prometheus metrics format. It uses the metrics from '
