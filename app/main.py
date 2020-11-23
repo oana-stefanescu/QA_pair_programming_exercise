@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.logger import logger
 from prometheus_fastapi_instrumentator import Instrumentator
 
-from .routers import metrics
+from .routers import metrics, partition_range
 
 
 APP_NAME = 'Partitioning Service'
@@ -33,6 +33,8 @@ app.include_router(
     prefix='/metrics',
     tags=['prometheus']
 )
+
+app.include_router(partition_range.router)
 
 
 @app.get("/")
