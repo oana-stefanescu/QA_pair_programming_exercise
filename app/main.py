@@ -1,4 +1,5 @@
 import logging
+import os
 
 from fastapi import FastAPI
 from fastapi.logger import logger
@@ -19,7 +20,40 @@ if __name__ != "main":
 else:
     logger.setLevel(logging.DEBUG)
 
-app = FastAPI(title=APP_NAME)
+# get the app root directory for reading files, if the environment variable is not defined use ./
+# this is the directory in which the root directory (containing the VERSION file) is located
+app_root: str = os.environ.get('APP_ROOT', './')
+
+version_file_path: str = os.path.join(app_root, 'VERSION')
+
+with open(version_file_path) as version_file:
+    version: str = version_file.readline()
+    version = version.strip()
+    if not version.startswith('v'):
+        version = 'v' + version
+
+description_file_path: str = os.path.join(app_root, 'app_description.md')
+
+with open(description_file_path) as description_file:
+    description: str = description_file.read()
+
+tags_metadata = [
+    {
+        'name': 'prometheus',
+        'description': 'The prometheus endpoint, returns the prometheus metrics format. It uses the metrics from '
+                       'prometheus-fastapi-instrumentator.',
+        'externalDocs': {
+            'description': 'prometheus-fastapi-instrumentator',
+            'url': 'https://pypi.org/project/prometheus-fastapi-instrumentator/',
+        }
+    }
+]
+
+app = FastAPI(title=APP_NAME,
+              version=version,
+              description=description,
+              openapi_tags=tags_metadata,
+)
 
 # create an instrumentator to expose metrics to prometheus
 instrumentator = Instrumentator(
