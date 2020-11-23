@@ -61,26 +61,26 @@ class Partitions:
     """
     Container holding all the different partition groups needed to calculate a partition string
     Attributes:
-        missing_hours_of_first_day:
-        missing_days_in_start_date_month:
-        missing_months_in_start_date_year:
-        missing_years:
-        missing_hours_of_last_day:
-        missing_days_in_end_date_month:
-        missing_months_in_end_date_year:
+        relevant_hours_of_start_date:
+        relevant_days_in_start_date_month:
+        relevant_months_in_start_date_year:
+        relevant_years:
+        relevant_hours_of_end_date:
+        relevant_days_in_end_date_month:
+        relevant_months_in_end_date_year:
     """
 
-    def __init__(self, missing_hours_of_first_day: Optional[RelevantHoursOnDay] = None,
-                 missing_days_in_start_date_month: Optional[RelevantDaysInMonth] = None,
-                 missing_months_in_start_date_year: Optional[RelevantMonthsInYear] = None,
-                 missing_years: Optional[RelevantYears] = None,
-                 missing_hours_of_last_day: Optional[RelevantHoursOnDay] = None,
-                 missing_days_in_end_date_month: Optional[RelevantDaysInMonth] = None,
-                 missing_months_in_end_date_year: Optional[RelevantMonthsInYear] = None):
-        self.missing_hours_of_first_day = missing_hours_of_first_day
-        self.missing_days_in_start_date_month = missing_days_in_start_date_month
-        self.missing_months_in_start_date_year = missing_months_in_start_date_year
-        self.missing_years = missing_years
-        self.missing_hours_of_last_day = missing_hours_of_last_day
-        self.missing_days_in_end_date_month = missing_days_in_end_date_month
-        self.missing_months_in_end_date_year = missing_months_in_end_date_year
+    def __init__(self, relevant_hours_of_start_date: Optional[RelevantHoursOnDay] = None,
+                 relevant_days_in_start_date_month: Optional[RelevantDaysInMonth] = None,
+                 relevant_months_in_start_date_year: Optional[RelevantMonthsInYear] = None,
+                 relevant_years: Optional[RelevantYears] = None,
+                 relevant_hours_of_end_date: Optional[RelevantHoursOnDay] = None,
+                 relevant_days_in_end_date_month: Optional[RelevantDaysInMonth] = None,
+                 relevant_months_in_end_date_year: Optional[RelevantMonthsInYear] = None):
+        self.relevant_hours_of_start_date = relevant_hours_of_start_date
+        self.relevant_days_in_start_date_month = relevant_days_in_start_date_month
+        self.relevant_months_in_start_date_year = relevant_months_in_start_date_year
+        self.relevant_years = relevant_years
+        self.relevant_hours_of_end_date = relevant_hours_of_end_date
+        self.relevant_days_in_end_date_month = relevant_days_in_end_date_month
+        self.relevant_months_in_end_date_year = relevant_months_in_end_date_year
