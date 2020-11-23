@@ -5,4 +5,5 @@ uvicorn==0.12.2
 prometheus_client<0.9.0,>=0.8.0
 prometheus-fastapi-instrumentator>=5.5.1
 pytest>=6.1.2
+# requests is required to run the tests with the fast API test client
 requests>=2.25.0
