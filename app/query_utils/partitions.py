@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 
-class MissingHoursOnDay:
+class RelevantHoursOnDay:
     """
     Holds the information for the first or the last day of a query time range
     Attributes:
@@ -18,7 +18,7 @@ class MissingHoursOnDay:
         self.hours = hours
 
 
-class MissingDaysInMonth:
+class RelevantDaysInMonth:
     """
     Holds the information of the missing days in the month of the start or end date
     Attributes:
@@ -33,7 +33,7 @@ class MissingDaysInMonth:
         self.days = days
 
 
-class MissingMonthsInYear:
+class RelevantMonthsInYear:
     """
     Holds the information  of the missing months in the year of the start or end date
         Attributes:
@@ -46,7 +46,7 @@ class MissingMonthsInYear:
         self.months = months
 
 
-class MissingYears:
+class RelevantYears:
     """
     Holds the information of the years in between the start and the end date
     Attributes:
@@ -70,13 +70,13 @@ class Partitions:
         missing_months_in_end_date_year:
     """
 
-    def __init__(self, missing_hours_of_first_day: Optional[MissingHoursOnDay] = None,
-                 missing_days_in_start_date_month: Optional[MissingDaysInMonth] = None,
-                 missing_months_in_start_date_year: Optional[MissingMonthsInYear] = None,
-                 missing_years: Optional[MissingYears] = None,
-                 missing_hours_of_last_day: Optional[MissingHoursOnDay] = None,
-                 missing_days_in_end_date_month: Optional[MissingDaysInMonth] = None,
-                 missing_months_in_end_date_year: Optional[MissingMonthsInYear] = None):
+    def __init__(self, missing_hours_of_first_day: Optional[RelevantHoursOnDay] = None,
+                 missing_days_in_start_date_month: Optional[RelevantDaysInMonth] = None,
+                 missing_months_in_start_date_year: Optional[RelevantMonthsInYear] = None,
+                 missing_years: Optional[RelevantYears] = None,
+                 missing_hours_of_last_day: Optional[RelevantHoursOnDay] = None,
+                 missing_days_in_end_date_month: Optional[RelevantDaysInMonth] = None,
+                 missing_months_in_end_date_year: Optional[RelevantMonthsInYear] = None):
         self.missing_hours_of_first_day = missing_hours_of_first_day
         self.missing_days_in_start_date_month = missing_days_in_start_date_month
         self.missing_months_in_start_date_year = missing_months_in_start_date_year

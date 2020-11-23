@@ -43,13 +43,13 @@ class PartitionQueryBuilder:
         self.end_day = self._get_end_day()
         self.end_month = self._get_end_month()
         self.end_year = self._get_end_year()
-        self.partitions = Partitions(missing_hours_of_first_day=self._get_missing_hours_of_first_day(),
-                                     missing_days_in_start_date_month=self._get_missing_days_in_start_date_month(),
-                                     missing_months_in_start_date_year=self.get_missing_months_in_start_date_year(),
-                                     missing_years=self._get_years(),
-                                     missing_hours_of_last_day=self._get_missing_hours_of_last_day(),
-                                     missing_days_in_end_date_month=self._get_missing_days_in_end_date_month(),
-                                     missing_months_in_end_date_year=self._get_missing_months_in_end_date_year())
+        self.partitions = Partitions(missing_hours_of_first_day=self._get_relevant_hours_of_start_date(),
+                                     missing_days_in_start_date_month=self._get_relevant_days_in_start_date_month(),
+                                     missing_months_in_start_date_year=self._get_relevant_months_in_start_date_year(),
+                                     missing_years=self._get_relevant_years(),
+                                     missing_hours_of_last_day=self._get_relevant_hours_of_last_day(),
+                                     missing_days_in_end_date_month=self._get_relevant_days_in_end_date_month(),
+                                     missing_months_in_end_date_year=self._get_relevant_months_in_end_date_year())
 
     def _get_date_part_as_int(self, datetime, date_part):
         return int(datetime.strftime(date_part))
@@ -78,7 +78,45 @@ class PartitionQueryBuilder:
     def _get_end_hour(self):
         return self._get_date_part_as_int(self.end_date, '%H')
 
-    def _get_missing_hours_of_first_day(self) -> MissingHoursOnDay:
+    def _remove_duplicate_month(self, months, date):
+        """
+        If the year of the startdate is the same as the year of the enddate, the methods
+        `_get_missing_months_in_end_date_year` and `__getMissingMonthsInStartDateYear`
+        create more partitions than are actually needed.
+        Those duplicate monthts are removed here.
+
+        :param months: List of months as integers
+        :param date: The calculated date for the diff
+        :return: List of months as integers
+        """
+        if self.start_year == self.end_year:
+            month = self._get_date_part_as_int(date, '%m')
+            if month in months:
+                months.remove(month)
+
+        return months
+
+    def _remove_duplicated_day(self, days, date):
+        """
+        If the year of the startdate and the enddate are in the same months
+        `_get_missing_days_in_start_date_month` and `_get_missing_days_in_end_date_month`
+        create more partitions than are actually needed.
+        Those duplicate days are removed here.
+
+        :param months: List of days as integers
+        :param date: The calculated date for the diff
+        :return: List of days as integers
+        """
+        if (self.end_year == self.start_year
+                and
+                self.end_month == self.start_month):
+            day = self._get_date_part_as_int(date, '%d')
+            if day in days:  # pragma: no cover
+                days.remove(day)
+
+        return days
+
+    def _get_relevant_hours_of_start_date(self) -> RelevantHoursOnDay:
         """
         Calculates the hours of the first day.
 
@@ -88,37 +126,30 @@ class PartitionQueryBuilder:
                 and
                 self.start_month == self.end_month
                 and
-                self.start_year == self.end_year
-        ):
+                self.start_year == self.end_year):
             hours = []
-            for missing_hour in range(self.start_hour, 24):
-                hours.append(missing_hour)
-            return MissingHoursOnDay(year=self.start_year, month=self.start_month, day=self.start_day, hours=hours)
+            for hour in range(self.start_hour, 24):
+                hours.append(hour)
+            return RelevantHoursOnDay(year=self.start_year, month=self.start_month, day=self.start_day, hours=hours)
 
-    def _get_missing_hours_of_last_day(self) -> MissingHoursOnDay:
+    def _get_relevant_hours_of_last_day(self) -> RelevantHoursOnDay:
         """
         Calculates the missing hours for the enddate.
 
         :return: Missing hours on the last day
         """
 
-        if (self.start_day == self.end_day
-                and
-                self.start_month == self.end_month
-                and
-                self.start_year == self.end_year
-        ):
+        if self.start_day == self.end_day and self.start_month == self.end_month and self.start_year == self.end_year:
             first_hour = self.start_hour
         else:
             first_hour = 0
 
         hours = []
-        for missing_hour in range(first_hour, self.end_hour + 1):
-            hours.append(missing_hour)
+        for hour in range(first_hour, self.end_hour + 1):
+            hours.append(hour)
+        return RelevantHoursOnDay(year=self.end_year, month=self.end_month, day=self.end_day, hours=hours)
 
-        return MissingHoursOnDay(year=self.end_year, month=self.end_month, day=self.end_day, hours=hours)
-
-    def _get_years(self):
+    def _get_relevant_years(self):
         """
         If there is more than one year time difference
         add the complete missing years to the partitions.
@@ -131,9 +162,9 @@ class PartitionQueryBuilder:
                 if missing_year != self.start_year:
                     years.append(missing_year)
             if len(years) > 0:  # pragma: no cover
-                return MissingYears(years=years)
+                return RelevantYears(years=years)
 
-    def _get_missing_days_in_start_date_month(self) -> MissingDaysInMonth:
+    def _get_relevant_days_in_start_date_month(self) -> RelevantDaysInMonth:
         """
         Calculates the missing day partitions for the month of the startdate.
 
@@ -162,10 +193,10 @@ class PartitionQueryBuilder:
                 days.append(missing_day)
 
             days = self._remove_duplicated_day(days, self.end_date)
-            if (len(days) > 0):
-                return MissingDaysInMonth(year=self.start_year, month=self.start_month, days=days)
+            if len(days) > 0:
+                return RelevantDaysInMonth(year=self.start_year, month=self.start_month, days=days)
 
-    def get_missing_months_in_start_date_year(self) -> MissingMonthsInYear:
+    def _get_relevant_months_in_start_date_year(self) -> RelevantMonthsInYear:
         """
         Calculates the missing months for the year of the startdate.
 
@@ -195,9 +226,9 @@ class PartitionQueryBuilder:
 
             months = self._remove_duplicate_month(months, self.start_date)
             if (len(months) > 0):
-                return MissingMonthsInYear(year=self.start_year, months=months)
+                return RelevantMonthsInYear(year=self.start_year, months=months)
 
-    def _get_missing_days_in_end_date_month(self) -> MissingDaysInMonth:
+    def _get_relevant_days_in_end_date_month(self) -> RelevantDaysInMonth:
         """
         Calculates the missing days partitions for the month of the enddate.
 
@@ -224,9 +255,9 @@ class PartitionQueryBuilder:
 
             days = self._remove_duplicated_day(days, self.start_date)
             if (len(days) > 0):
-                return MissingDaysInMonth(year=self.end_year, month=self.end_month, days=days)
+                return RelevantDaysInMonth(year=self.end_year, month=self.end_month, days=days)
 
-    def _get_missing_months_in_end_date_year(self) -> MissingMonthsInYear:
+    def _get_relevant_months_in_end_date_year(self) -> RelevantMonthsInYear:
         """
         Calculates the missing months for the year of the enddate.
 
@@ -251,7 +282,7 @@ class PartitionQueryBuilder:
 
             months = self._remove_duplicate_month(months, self.start_date)
             if (len(months) > 0):
-                return MissingMonthsInYear(year=self.end_year, months=months)
+                return RelevantMonthsInYear(year=self.end_year, months=months)
 
     def _build_query_from_partition(self, partition):
         """
@@ -298,19 +329,6 @@ class PartitionQueryBuilder:
 
         :return: string
         """
-        sorted_partitions = sorted(
-            partitions.items(),
-            key=lambda pair: [
-                self.FIRST_DAY,
-                self.MISSING_DAYS_IN_START_DATE_MONTH,
-                self.MISSING_MONTHS_IN_START_DATE_YEAR,
-                self.MISSING_YEARS,
-                self.MISSING_MONTHS_IN_END_DATE_YEAR,
-                self.MISSING_DAYS_IN_END_DATE_MONTH,
-                self.LAST_DAY
-            ].index(pair[0])
-        )
-
         final_partitions = []
         partitionMd5 = {}
         for sorted_partition in sorted_partitions:
@@ -338,41 +356,3 @@ class PartitionQueryBuilder:
                 )
             )
         )
-
-    def _remove_duplicate_month(self, months, date):
-        """
-        If the year of the startdate is the same as the year of the enddate, the methods
-        `_get_missing_months_in_end_date_year` and `__getMissingMonthsInStartDateYear`
-        create more partitions than are actually needed.
-        Those duplicate monthts are removed here.
-
-        :param months: List of months as integers
-        :param date: The calculated date for the diff
-        :return: List of months as integers
-        """
-        if self.start_year == self.end_year:
-            month = self._get_date_part_as_int(date, '%m')
-            if month in months:
-                months.remove(month)
-
-        return months
-
-    def _remove_duplicated_day(self, days, date):
-        """
-        If the year of the startdate and the enddate are in the same months
-        `_get_missing_days_in_start_date_month` and `_get_missing_days_in_end_date_month`
-        create more partitions than are actually needed.
-        Those duplicate days are removed here.
-
-        :param months: List of days as integers
-        :param date: The calculated date for the diff
-        :return: List of days as integers
-        """
-        if (self.end_year == self.start_year
-                and
-                self.end_month == self.start_month):
-            day = self._get_date_part_as_int(date, '%d')
-            if day in days:  # pragma: no cover
-                days.remove(day)
-
-        return days
