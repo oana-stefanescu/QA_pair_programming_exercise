@@ -1,7 +1,6 @@
 from calendar import monthrange
 from datetime import datetime
 import pytz
-from dateutil import parser
 from dateutil.relativedelta import relativedelta
 
 from app.query_utils.partitions import *
@@ -213,15 +212,12 @@ class PartitionQueryBuilder(object):
             A TimeRange object holding the information about all the full days of the start date month or `None` if
             there aren't any.
         """
-        last_day_of_month = parser.parse(
-            "{0}-{1}-{2}T23:59:59+00:00".format(
-                self.start_year,
-                self.start_month,
-                monthrange(self.start_year, self.start_month)[1]
-            )
-        )
+        last_day_of_month = datetime(year=self.start_year, month=self.start_month,
+                                     day=monthrange(self.start_year, self.start_month)[1],
+                                     hour=23, minute=59, second=59,
+                                     tzinfo=pytz.utc)
 
-        if Date.is_first_date_time_greater(last_day_of_month, self.end_date):
+        if is_first_date_time_greater(last_day_of_month, self.end_date):
             date_for_diff = self.end_date
         else:
             date_for_diff = last_day_of_month
@@ -248,13 +244,10 @@ class PartitionQueryBuilder(object):
             A TimeRange object holding the information about all the full month of the start date year or `None` if
             there aren't any.
         """
-        last_day_of_year = parser.parse(
-            "{0}-12-31T23:59:59+00:00".format(
-                self.start_year
-            )
-        )
+        last_day_of_year = datetime(year=self.start_year, month=12, day=31, hour=23, minute=59, second=59,
+                                    tzinfo=pytz.utc)
 
-        if Date.is_first_date_time_greater(last_day_of_year, self.end_date):
+        if is_first_date_time_greater(last_day_of_year, self.end_date):
             date_for_diff = self.end_date
             add_compare_month = False
         else:
@@ -286,14 +279,9 @@ class PartitionQueryBuilder(object):
             A TimeRange object holding the information about all the full days of the end date month or `None` if
             there aren't any.
         """
-        first_day_of_end_date_month = parser.parse(
-            "{0}-{1}-01T00:00:00+00:00".format(
-                self.end_year,
-                self.end_month
-            )
-        )
+        first_day_of_end_date_month = datetime(year=self.end_year, month=self.end_month, day=1, tzinfo=pytz.utc)
 
-        if Date.is_first_date_time_greater(self.start_date, first_day_of_end_date_month):
+        if is_first_date_time_greater(self.start_date, first_day_of_end_date_month):
             date_for_diff = self.start_date
         else:
             date_for_diff = first_day_of_end_date_month
@@ -320,11 +308,9 @@ class PartitionQueryBuilder(object):
             A TimeRange object holding the information about all the full month of the end date year or `None` if
             there aren't any.
         """
-        first_day_of_end_date_year = parser.parse(
-            "{0}-01-01T00:00:00+00:00".format(self.end_year)
-        )
+        first_day_of_end_date_year = datetime(year=self.end_year, month=1, day=1, tzinfo=pytz.utc)
 
-        if Date.is_first_date_time_greater(self.start_date, first_day_of_end_date_year):
+        if is_first_date_time_greater(self.start_date, first_day_of_end_date_year):
             date_for_diff = self.start_date
         else:
             date_for_diff = first_day_of_end_date_year
