@@ -1,5 +1,4 @@
 from calendar import monthrange
-import time
 from datetime import datetime
 import pytz
 from dateutil import parser
