@@ -2,6 +2,7 @@
 
 VENV_PIP=./venv/bin/pip
 VENV_UVICORN=./venv/bin/uvicorn
+VENV_PYTHON=./venv/bin/python
 BI_PYPI=https://repo2.rz.adition.net/repository/bi-pipy/simple/
 DOCKER_IMAGE:=partitioning-service
 DOCKER_CONTAINER:=partitioning-service
@@ -15,6 +16,9 @@ venv:
 
 serve: venv
 	$(VENV_UVICORN) app.main:app --reload --port $(PORT) --host 0.0.0.0 --log-level debug
+
+run_tests:
+	$(VENV_PYTHON) -m pytest tests --cov  app
 
 docker_rm:
 	docker rm -f -v $(DOCKER_CONTAINER) || true
