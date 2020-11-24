@@ -17,7 +17,7 @@ venv:
 serve: venv
 	$(VENV_UVICORN) app.main:app --reload --port $(PORT) --host 0.0.0.0 --log-level debug
 
-run_tests:
+run_tests: venv
 	$(VENV_PYTHON) -m pytest tests --cov  app
 
 docker_rm:
