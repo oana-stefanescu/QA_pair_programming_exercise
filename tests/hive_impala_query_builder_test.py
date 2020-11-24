@@ -198,8 +198,8 @@ def test_end_date_january_next_year():
     """
 
     query_builder = PartitionQueryBuilder(
-        parser.parse("2014-01-26 00:00:00").astimezone(tz.tzutc()),
-        parser.parse("2015-01-02 23:59:59").astimezone(tz.tzutc())
+        datetime(year=2014, month=1, day=25, hour=23, tzinfo=pytz.utc),
+        datetime(year=2015, month=1, day=2, hour=22, minute=59, second=59, tzinfo=pytz.utc)
     )
 
     expected = "(" \
@@ -214,7 +214,7 @@ def test_end_date_january_next_year():
                "(`year` = 2015 AND `month` = 1 AND `day` = 2 AND `hour` BETWEEN 0 AND 22)" \
                ")"
     assert query_builder.build_partition_filter() == expected
-    assert query_builder.build_timestamp_filter() == "`timestamp` BETWEEN 1390687200 AND 1420235999"
+    assert query_builder.build_timestamp_filter() == "`timestamp` BETWEEN 1390690800 AND 1420239599"
 
 
 def test_end_date_first_january():
@@ -222,8 +222,8 @@ def test_end_date_first_january():
     Test the change of the years. Here the end date wil be in 1st January.
     """
     query_builder = PartitionQueryBuilder(
-        parser.parse("2014-01-26 00:00:00").astimezone(tz.tzutc()),
-        parser.parse("2015-01-01 23:59:59").astimezone(tz.tzutc())
+        datetime(year=2014, month=1, day=25, hour=23, tzinfo=pytz.utc),
+        datetime(year=2015, month=1, day=1, hour=22, minute=59, second=59, tzinfo=pytz.utc)
     )
 
     expected = "(" \
@@ -236,7 +236,7 @@ def test_end_date_first_january():
                "(`year` = 2015 AND `month` = 1 AND `day` = 1 AND `hour` BETWEEN 0 AND 22)" \
                ")"
     assert query_builder.build_partition_filter() == expected
-    assert query_builder.build_timestamp_filter() == "`timestamp` BETWEEN 1390687200 AND 1420149599"
+    assert query_builder.build_timestamp_filter() == "`timestamp` BETWEEN 1390690800 AND 1420153199"
 
 
 def test_end_date_january_in_two_years():
@@ -245,8 +245,8 @@ def test_end_date_january_in_two_years():
     """
 
     query_builder = PartitionQueryBuilder(
-        parser.parse("2014-01-26 00:00:00").astimezone(tz.tzutc()),
-        parser.parse("2016-01-01 23:59:59").astimezone(tz.tzutc())
+        datetime(year=2014, month=1, day=25, hour=23, tzinfo=pytz.utc),
+        datetime(year=2016, month=1, day=1, hour=22, minute=59, second=59, tzinfo=pytz.utc)
     )
     expected = "(" \
                "(`year` = 2014 AND `month` = 1 AND `day` = 25 AND `hour` = 23)" \
@@ -267,10 +267,13 @@ def test_one_second_diff():
     Test the runtime when there is one second difference.
     """
     query_builder = PartitionQueryBuilder(
-        parser.parse("2017-08-24T09:58:08+0200").astimezone(tz.tzutc()),
-        parser.parse("2017-08-24T09:58:09+0200").astimezone(tz.tzutc())
+        datetime(year=2017, month=8, day=24, hour=7, minute=58, second=8, tzinfo=pytz.utc),
+        datetime(year=2017, month=8, day=24, hour=7, minute=58, second=9, tzinfo=pytz.utc)
     )
-    assert query_builder.build_partition_filter() == "((`year` = 2017 AND `month` = 8 AND `day` = 24 AND `hour` = 7))"
+
+    expected = "((`year` = 2017 AND `month` = 8 AND `day` = 24 AND `hour` = 7))"
+
+    assert query_builder.build_partition_filter() == expected
 
 
 def test_one_second_diff_in_different_hours():
@@ -278,10 +281,13 @@ def test_one_second_diff_in_different_hours():
     Test the runtime when there is one second difference.
     """
     query_builder = PartitionQueryBuilder(
-        parser.parse("2017-08-24T09:59:59+0200").astimezone(tz.tzutc()),
-        parser.parse("2017-08-24T10:00:00+0200").astimezone(tz.tzutc())
+        datetime(year=2017, month=8, day=24, hour=7, minute=59, second=59, tzinfo=pytz.utc),
+        datetime(year=2017, month=8, day=24, hour=8, tzinfo=pytz.utc)
     )
-    assert query_builder.build_partition_filter() == "((`year` = 2017 AND `month` = 8 AND `day` = 24 AND `hour` BETWEEN 7 AND 8))"
+
+    expected = "((`year` = 2017 AND `month` = 8 AND `day` = 24 AND `hour` BETWEEN 7 AND 8))"
+
+    assert query_builder.build_partition_filter() == expected
 
 
 def test_several_years():
@@ -290,8 +296,8 @@ def test_several_years():
     """
 
     query_builder = PartitionQueryBuilder(
-        parser.parse("2014-01-01 00:00:00+00:00").astimezone(tz.tzutc()),
-        parser.parse("2020-12-31 23:59:59+00:00").astimezone(tz.tzutc())
+        datetime(year=2014, month=1, day=1, hour=0, tzinfo=pytz.utc),
+        datetime(year=2020, month=12, day=31, hour=23, minute=59, second=59, tzinfo=pytz.utc)
     )
 
     expected = "(" \
