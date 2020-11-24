@@ -3,7 +3,7 @@ from datetime import datetime
 import pytz
 from dateutil.relativedelta import relativedelta
 
-from app.query_utils.partitions import *
+from app.query_utils.time_range_container import *
 
 
 def generate_timerange_query(start: datetime, end: datetime) -> str:
@@ -150,14 +150,14 @@ class PartitionQueryBuilder(object):
 
         return days
 
-    def _get_relevant_hours_of_start_date(self) -> Optional[TimeRange]:
+    def _get_relevant_hours_of_start_date(self) -> Optional[TimeRangeContainer]:
         """
         Calculates all the relevant hours of the start date that should be scanned. If the start date is the same as the
         end date, it will return `None` and the relevant hours will be calculated by the method
         `_get_relevant_hours_of_end_date`.
 
         Returns:
-            A TimeRange object holding all the relevant hours of the start date or `None` if the start date is the same
+            A TimeRangeContainer object holding all the relevant hours of the start date or `None` if the start date is the same
             as the end date.
         """
         if not (self.start_day == self.end_day
@@ -168,14 +168,14 @@ class PartitionQueryBuilder(object):
             hours = []
             for hour in range(self.start_hour, 24):
                 hours.append(hour)
-            return TimeRange(years=[self.start_year], months=[self.start_month], days=[self.start_day], hours=hours)
+            return TimeRangeContainer(years=[self.start_year], months=[self.start_month], days=[self.start_day], hours=hours)
 
-    def _get_relevant_hours_of_end_date(self) -> TimeRange:
+    def _get_relevant_hours_of_end_date(self) -> TimeRangeContainer:
         """
         Calculates all the relevant hours of the end date that should be scanned.
 
         Returns:
-            A TimeRange object holding all the relevant hours of the end date that should be scanned.
+            A TimeRangeContainer object holding all the relevant hours of the end date that should be scanned.
         """
         if self.start_day == self.end_day and self.start_month == self.end_month and self.start_year == self.end_year:
             first_hour = self.start_hour
@@ -186,14 +186,14 @@ class PartitionQueryBuilder(object):
         for hour in range(first_hour, self.end_hour + 1):
             hours.append(hour)
 
-        return TimeRange(years=[self.end_year], months=[self.end_month], days=[self.end_day], hours=hours)
+        return TimeRangeContainer(years=[self.end_year], months=[self.end_month], days=[self.end_day], hours=hours)
 
-    def _get_gap_years(self) -> Optional[TimeRange]:
+    def _get_gap_years(self) -> Optional[TimeRangeContainer]:
         """
         Calculates all the years between the start date year and the end date year that should be scanned completely.
 
         Returns:
-            A TimeRange object holding the information about the years between the start date and the end date that
+            A TimeRangeContainer object holding the information about the years between the start date and the end date that
             should be scanned completely or `None` if there aren't any.
         """
         if relativedelta(self.end_date, self.start_date).years > 0:
@@ -201,15 +201,15 @@ class PartitionQueryBuilder(object):
             for missing_year in range(self.start_year + 1, self.end_year):
                 years.append(missing_year)
             if len(years) > 0:
-                return TimeRange(years=years)
+                return TimeRangeContainer(years=years)
 
-    def _get_relevant_days_in_start_date_month(self) -> Optional[TimeRange]:
+    def _get_relevant_days_in_start_date_month(self) -> Optional[TimeRangeContainer]:
         """
         Calculates all the relevant days for the month of the start date. If there are no days in the start date month
         that should be scanned completely, the output will be `None`.
 
         Returns:
-            A TimeRange object holding the information about all the full days of the start date month or `None` if
+            A TimeRangeContainer object holding the information about all the full days of the start date month or `None` if
             there aren't any.
         """
         last_day_of_month = datetime(year=self.start_year, month=self.start_month,
@@ -233,15 +233,15 @@ class PartitionQueryBuilder(object):
 
             days = self._remove_duplicate_day(days, self.end_date)
             if len(days) > 0:
-                return TimeRange(years=[self.start_year], months=[self.start_month], days=days)
+                return TimeRangeContainer(years=[self.start_year], months=[self.start_month], days=days)
 
-    def _get_relevant_months_in_start_date_year(self) -> Optional[TimeRange]:
+    def _get_relevant_months_in_start_date_year(self) -> Optional[TimeRangeContainer]:
         """
         Calculates all the relevant months for the year of the start date. If there are no months in the start year that
         should be scanned completely, the output will be `None`.
 
         Returns:
-            A TimeRange object holding the information about all the full month of the start date year or `None` if
+            A TimeRangeContainer object holding the information about all the full month of the start date year or `None` if
             there aren't any.
         """
         last_day_of_year = datetime(year=self.start_year, month=12, day=31, hour=23, minute=59, second=59,
@@ -268,15 +268,15 @@ class PartitionQueryBuilder(object):
 
             months = self._remove_duplicate_month(months, self.start_date)
             if len(months) > 0:
-                return TimeRange(years=[self.start_year], months=months)
+                return TimeRangeContainer(years=[self.start_year], months=months)
 
-    def _get_relevant_days_in_end_date_month(self) -> Optional[TimeRange]:
+    def _get_relevant_days_in_end_date_month(self) -> Optional[TimeRangeContainer]:
         """
         Calculates all the relevant days for the month of the end date. If there are no days in the end date month that
         should be scanned completely, the output will be `None`.
 
         Returns:
-            A TimeRange object holding the information about all the full days of the end date month or `None` if
+            A TimeRangeContainer object holding the information about all the full days of the end date month or `None` if
             there aren't any.
         """
         first_day_of_end_date_month = datetime(year=self.end_year, month=self.end_month, day=1, tzinfo=pytz.utc)
@@ -297,15 +297,15 @@ class PartitionQueryBuilder(object):
 
             days = self._remove_duplicate_day(days, self.start_date)
             if len(days) > 0:
-                return TimeRange(years=[self.end_year], months=[self.end_month], days=days)
+                return TimeRangeContainer(years=[self.end_year], months=[self.end_month], days=days)
 
-    def _get_relevant_months_in_end_date_year(self) -> Optional[TimeRange]:
+    def _get_relevant_months_in_end_date_year(self) -> Optional[TimeRangeContainer]:
         """
         Calculates all the relevant months for the year of the end date. If there are no months in the end year that
         should be scanned completely, the output will be `None`.
 
         Returns:
-            A TimeRange object holding the information about all the full month of the end date year or `None` if
+            A TimeRangeContainer object holding the information about all the full month of the end date year or `None` if
             there aren't any.
         """
         first_day_of_end_date_year = datetime(year=self.end_year, month=1, day=1, tzinfo=pytz.utc)
@@ -325,7 +325,7 @@ class PartitionQueryBuilder(object):
 
             months = self._remove_duplicate_month(months, self.start_date)
             if len(months) > 0:
-                return TimeRange(years=[self.end_year], months=months)
+                return TimeRangeContainer(years=[self.end_year], months=months)
 
     @staticmethod
     def _build_filter_for_key(key: str, values: Optional[List[int]] = None) -> Optional[str]:
@@ -347,12 +347,12 @@ class PartitionQueryBuilder(object):
         else:
             return "`{0}` BETWEEN {1} AND {2}".format(key, str(min(values)), str(max(values)))
 
-    def _build_partition_filter_for_timerange(self, time_range: Optional[TimeRange] = None) -> Optional[str]:
+    def _build_partition_filter_for_timerange(self, time_range: Optional[TimeRangeContainer] = None) -> Optional[str]:
         """
-        Builds a partition filter for a given TimeRange object.
+        Builds a partition filter for a given TimeRangeContainer object.
 
         Args:
-            time_range: The TimeRange object.
+            time_range: The TimeRangeContainer object.
 
         Returns:
             The partition filter as a string or `None` if the time_range was `None`.

@@ -1,10 +1,10 @@
 from typing import List, Optional
 
 
-class TimeRange(object):
+class TimeRangeContainer(object):
     """
-    TODO: Add information what this thing is here for
-    Holds information for a certain time range.
+    Container holding information about the different years, months, days and hours that need to be considered to
+    generate the partition queries for a given time range.
 
     Attributes:
         years: the years of the given time range
