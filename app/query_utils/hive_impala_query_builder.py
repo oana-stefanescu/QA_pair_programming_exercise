@@ -411,8 +411,8 @@ class PartitionQueryBuilder(object):
         Returns:
             The timestamp filter clause for the query.
         """
-        start_date_timestamp = int(time.mktime(self.start_date.timetuple()))
-        end_date_timestamp = int(time.mktime(self.end_date.timetuple()))
+        start_date_timestamp = int(self.start_date.timestamp())
+        end_date_timestamp = int(self.end_date.timestamp())
         timestamp_filter = "`timestamp` BETWEEN {0} AND {1}".format(start_date_timestamp, end_date_timestamp)
 
         return timestamp_filter
