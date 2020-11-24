@@ -1,4 +1,3 @@
-import hashlib
 from calendar import monthrange
 import time
 from datetime import datetime
@@ -51,8 +50,9 @@ class PartitionQueryBuilder:
                                      relevant_days_in_end_date_month=self._get_relevant_days_in_end_date_month(),
                                      relevant_months_in_end_date_year=self._get_relevant_months_in_end_date_year())
 
-    def _get_date_part_as_int(self, datetime, date_part):
-        return int(datetime.strftime(date_part))
+    @staticmethod
+    def _get_date_part_as_int(date_time, date_part):
+        return int(date_time.strftime(date_part))
 
     def _get_start_year(self):
         return self._get_date_part_as_int(self.start_date, '%Y')
@@ -116,7 +116,7 @@ class PartitionQueryBuilder:
 
         return days
 
-    def _get_relevant_hours_of_start_date(self) -> RelevantHoursOnDay:
+    def _get_relevant_hours_of_start_date(self) -> TimeRange:
         """
         Calculates the hours of the first day.
 
@@ -130,9 +130,9 @@ class PartitionQueryBuilder:
             hours = []
             for hour in range(self.start_hour, 24):
                 hours.append(hour)
-            return RelevantHoursOnDay(year=self.start_year, month=self.start_month, day=self.start_day, hours=hours)
+            return TimeRange(years=[self.start_year], months=[self.start_month], days=[self.start_day], hours=hours)
 
-    def _get_relevant_hours_of_end_date(self) -> RelevantHoursOnDay:
+    def _get_relevant_hours_of_end_date(self) -> TimeRange:
         """
         Calculates the missing hours for the enddate.
 
@@ -147,9 +147,9 @@ class PartitionQueryBuilder:
         hours = []
         for hour in range(first_hour, self.end_hour + 1):
             hours.append(hour)
-        return RelevantHoursOnDay(year=self.end_year, month=self.end_month, day=self.end_day, hours=hours)
+        return TimeRange(years=[self.end_year], months=[self.end_month], days=[self.end_day], hours=hours)
 
-    def _get_relevant_years(self):
+    def _get_relevant_years(self) -> TimeRange:
         """
         If there is more than one year time difference
         add the complete missing years to the partitions.
@@ -162,9 +162,9 @@ class PartitionQueryBuilder:
                 if missing_year != self.start_year:
                     years.append(missing_year)
             if len(years) > 0:  # pragma: no cover
-                return RelevantYears(years=years)
+                return TimeRange(years=years)
 
-    def _get_relevant_days_in_start_date_month(self) -> RelevantDaysInMonth:
+    def _get_relevant_days_in_start_date_month(self) -> TimeRange:
         """
         Calculates the missing day partitions for the month of the startdate.
 
@@ -194,9 +194,9 @@ class PartitionQueryBuilder:
 
             days = self._remove_duplicated_day(days, self.end_date)
             if len(days) > 0:
-                return RelevantDaysInMonth(year=self.start_year, month=self.start_month, days=days)
+                return TimeRange(years=[self.start_year], months=[self.start_month], days=days)
 
-    def _get_relevant_months_in_start_date_year(self) -> RelevantMonthsInYear:
+    def _get_relevant_months_in_start_date_year(self) -> TimeRange:
         """
         Calculates the missing months for the year of the startdate.
 
@@ -216,19 +216,18 @@ class PartitionQueryBuilder:
         if relativedelta(date_for_diff, self.start_date).months > 0:
             months = []
 
-            # @see testMoreThanOneYear
             compare_month = int(date_for_diff.strftime("%m"))
-            if (compare_month == 12):
+            if compare_month == 12:
                 compare_month = compare_month + 1
 
             for missing_month in range(self.start_month + 1, compare_month):
                 months.append(missing_month)
 
             months = self._remove_duplicate_month(months, self.start_date)
-            if (len(months) > 0):
-                return RelevantMonthsInYear(year=self.start_year, months=months)
+            if len(months) > 0:
+                return TimeRange(years=[self.start_year], months=months)
 
-    def _get_relevant_days_in_end_date_month(self) -> RelevantDaysInMonth:
+    def _get_relevant_days_in_end_date_month(self) -> TimeRange:
         """
         Calculates the missing days partitions for the month of the enddate.
 
@@ -246,7 +245,6 @@ class PartitionQueryBuilder:
         else:
             date_for_diff = first_day_of_end_date_month
 
-        partition = {}
         if (relativedelta(self.end_date, date_for_diff).months > 0 or
                 relativedelta(self.end_date, date_for_diff).days > 0):
             days = []
@@ -254,10 +252,10 @@ class PartitionQueryBuilder:
                 days.append(missing_days)
 
             days = self._remove_duplicated_day(days, self.start_date)
-            if (len(days) > 0):
-                return RelevantDaysInMonth(year=self.end_year, month=self.end_month, days=days)
+            if len(days) > 0:
+                return TimeRange(years=[self.end_year], months=[self.end_month], days=days)
 
-    def _get_relevant_months_in_end_date_year(self) -> RelevantMonthsInYear:
+    def _get_relevant_months_in_end_date_year(self) -> TimeRange:
         """
         Calculates the missing months for the year of the enddate.
 
@@ -272,8 +270,7 @@ class PartitionQueryBuilder:
         else:
             date_for_diff = first_day_of_end_date_year
 
-        partition = {}
-        if (relativedelta(self.end_date, date_for_diff).months > 0):
+        if relativedelta(self.end_date, date_for_diff).months > 0:
             months = []
             for missing_month in range(
                     self._get_date_part_as_int(date_for_diff, '%m'),
@@ -281,67 +278,51 @@ class PartitionQueryBuilder:
                 months.append(missing_month)
 
             months = self._remove_duplicate_month(months, self.start_date)
-            if (len(months) > 0):
-                return RelevantMonthsInYear(year=self.end_year, months=months)
+            if len(months) > 0:
+                return TimeRange(years=[self.end_year], months=months)
 
-    def _build_query_from_partition(self, partition):
-        """
-        Build the sql string for the given partition parameters.
+    @staticmethod
+    def _build_where_clause_for_key(key: str, values: Optional[List[int]] = None) -> Optional[str]:
+        if not values:
+            return None
+        if len(values) == 1:
+            return "`{0}` = {1}".format(key, str(values[0]))
+        else:
+            return "`{0}` BETWEEN {1} AND {2}".format(key, str(min(values)), str(max(values)))
 
-        Example input:
-        {'month': [5], 'day': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], 'year': [2010]}
-
-        Example output:
-        (`month` = 5 AND `day` BETWEEN 1 AND 13 AND `year` = 2010)
-
-        :param partition: Dict with partition informartions
-        :return: string
-        """
-        sorted_partition = sorted(
-            partition.items(),
-            key=lambda pair: [
-                self.YEAR,
-                self.MONTH,
-                self.DAY,
-                self.HOUR
-            ].index(pair[0])
-        )
-
-        sql_parts = []
-        for partition_info in sorted_partition:
-            key = partition_info[0]
-            values = partition_info[1]
-
-            if len(values) == 1:
-                sql_parts.append("`{0}` = {1}".format(key, values[0]))
-            else:
-                sql_parts.append(
-                    "`{0}` BETWEEN {1} AND {2}".
-                        format(key, min(values), max(values))
-                )
-
-        return '({0})'.format(' AND '.join(sql_parts))
+    def _build_query_from_partition(self, time_range: Optional[TimeRange] = None) -> Optional[str]:
+        if time_range is None:
+            return None
+        where_clauses = [
+            self._build_where_clause_for_key('year', time_range.years),
+            self._build_where_clause_for_key('month', time_range.months),
+            self._build_where_clause_for_key('day', time_range.days),
+            self._build_where_clause_for_key('hour', time_range.hours)
+        ]
+        # filter out None values
+        where_clauses = list(filter(lambda x: x is not None, where_clauses))
+        # combine to full where clause
+        full_where_clause = '({0})'.format(' AND '.join(where_clauses))
+        return full_where_clause
 
     def build_partition_filter(self):
-        """
-        Generates the partition query for all necessary partitions
-        for the given timerange.
-
-        :return: string
-        """
-        final_partitions = []
-        partitionMd5 = {}
-        for sorted_partition in sorted_partitions:
-            partition_info = sorted_partition[1]
-            if (len(partition_info) == 0):
-                continue
-            partitionQuery = self._build_query_from_partition(partition_info)
-            md5 = hashlib.md5(partitionQuery.encode("utf")).hexdigest()
-            if md5 not in partitionMd5:
-                final_partitions.append(partitionQuery)
-                partitionMd5[md5] = True
-
-        return '({0})'.format(' OR '.join(final_partitions))
+        partition_where_clauses = [
+            self._build_query_from_partition(self.partitions.relevant_hours_of_start_date),
+            self._build_query_from_partition(self.partitions.relevant_days_in_start_date_month),
+            self._build_query_from_partition(self.partitions.relevant_months_in_start_date_year),
+            self._build_query_from_partition(self.partitions.relevant_years),
+            self._build_query_from_partition(self.partitions.relevant_months_in_end_date_year),
+            self._build_query_from_partition(self.partitions.relevant_days_in_end_date_month),
+            self._build_query_from_partition(self.partitions.relevant_hours_of_end_date)
+        ]
+        # filter out None values
+        partition_where_clauses = list(filter(lambda x: x is not None, partition_where_clauses))
+        # remove duplicates
+        # TODO: how can this happen?
+        partition_where_clauses = list(set(partition_where_clauses))
+        # combine to full partitioning clause
+        full_partitioning_clause = '({0})'.format(' OR '.join(partition_where_clauses))
+        return full_partitioning_clause
 
     def build_timestamp_filter(self):
         return "`timestamp` BETWEEN {0} AND {1}".format(
