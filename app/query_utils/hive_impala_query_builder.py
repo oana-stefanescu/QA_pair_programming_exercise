@@ -247,7 +247,7 @@ class PartitionQueryBuilder(object):
         if relativedelta(date_for_diff, self.start_date).months > 0:
             months = []
 
-            compare_month = int(date_for_diff.strftime("%m"))
+            compare_month = self._get_date_part_as_int(date_for_diff, '%m')
 
             for month in range(self.start_month + 1, compare_month):
                 months.append(month)
@@ -285,7 +285,7 @@ class PartitionQueryBuilder(object):
                 relativedelta(self.end_date, date_for_diff).days > 0):
             days = []
             for day in range(
-                    self._get_date_part_as_int(date_for_diff, '%m'),
+                    self._get_date_part_as_int(date_for_diff, '%d'),
                     self.end_day
             ):
                 days.append(day)
