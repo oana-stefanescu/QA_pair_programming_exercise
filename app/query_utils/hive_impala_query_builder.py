@@ -18,7 +18,12 @@ def generate_timerange_query(start: datetime, end: datetime) -> str:
     """
     assert start.tzinfo == pytz.utc and end.tzinfo == pytz.utc
     assert Date.is_first_date_time_greater(start, end)
+    partition_query_builder = PartitionQueryBuilder(start_date=start, end_date=end)
+    partition_filter = partition_query_builder.build_partition_filter()
+    time_filter = partition_query_builder.build_timestamp_filter()
+    complete_filter = "{0} AND {1}".format(time_filter, partition_filter)
 
+    return complete_filter
 
 class PartitionQueryBuilder:
     """
