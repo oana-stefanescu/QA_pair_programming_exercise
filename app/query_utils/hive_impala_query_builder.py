@@ -20,8 +20,12 @@ def generate_timerange_query(start: datetime, end: datetime) -> str:
     Returns:
         The partition query string.
     """
-    assert start.tzinfo == pytz.utc and end.tzinfo == pytz.utc
-    assert Date.is_first_date_time_greater(start, end)
+    if start.tzinfo != pytz.utc:
+        raise ValueError("Start date has to be in UTC. Instead we have %s" % str(start.tzinfo))
+    if end.tzinfo != pytz.utc:
+        raise ValueError("End date has to be in UTC. Instead we have %s" % str(end.tzinfo))
+    if Date.is_first_date_time_greater(start, end):
+        raise ValueError("Start date has to be before the end date. You have start:%s \tend:%s" % (start, end))
 
     partition_query_builder = PartitionQueryBuilder(start_date=start, end_date=end)
     partition_filter = partition_query_builder.build_partition_filter()
@@ -47,6 +51,7 @@ class PartitionQueryBuilder(object):
         end_month: The month of the end date.
         end_year: The year of the end date.
     """
+
     def __init__(self, start_date: datetime, end_date: datetime):
         """
         Args:

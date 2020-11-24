@@ -1,8 +1,25 @@
 from dateutil import parser, tz
 from datetime import datetime
 import pytz
+import pytest
 
-from app.query_utils.hive_impala_query_builder import PartitionQueryBuilder
+from app.query_utils.hive_impala_query_builder import PartitionQueryBuilder, generate_timerange_query
+
+
+def test_generate_timerange_query_errors():
+    """
+    Checks that the correct assertions are thrown
+    """
+    start_no_time_zone = datetime(year=2017, month=5, day=13, hour=22)
+    end_no_time_zone = datetime(year=2019, month=5, day=14, hour=22)
+    start_correct_time_zone = datetime(year=2017, month=5, day=13, hour=22, tzinfo=pytz.utc)
+    end_wrong_time_zone = datetime(year=2017, month=5, day=14, hour=22, tzinfo=pytz.timezone("US/Eastern"))
+    with pytest.raises(ValueError, match="Start date has to be in UTC"):
+        generate_timerange_query(start_no_time_zone, end_no_time_zone)
+    with pytest.raises(ValueError, match="End date has to be in UTC"):
+        generate_timerange_query(start_correct_time_zone, end_wrong_time_zone)
+    with pytest.raises(ValueError, match="Start date has to be before the end date"):
+        generate_timerange_query(pytz.utc.localize(end_no_time_zone), start_correct_time_zone)
 
 
 def test_runtime_one_day():
