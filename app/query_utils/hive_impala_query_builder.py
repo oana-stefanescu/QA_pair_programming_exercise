@@ -4,7 +4,6 @@ import pytz
 from dateutil import parser
 from dateutil.relativedelta import relativedelta
 
-from app.query_utils.date_functions import Date
 from app.query_utils.partitions import *
 
 
