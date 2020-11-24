@@ -23,7 +23,7 @@ def generate_timerange_query(start: datetime, end: datetime) -> str:
         raise ValueError("Start date has to be in UTC. Instead we have %s" % str(start.tzinfo))
     if end.tzinfo != pytz.utc:
         raise ValueError("End date has to be in UTC. Instead we have %s" % str(end.tzinfo))
-    if Date.is_first_date_time_greater(start, end):
+    if is_first_date_time_greater(start, end):
         raise ValueError("Start date has to be before the end date. You have start:%s \tend:%s" % (start, end))
 
     partition_query_builder = PartitionQueryBuilder(start_date=start, end_date=end)
@@ -32,6 +32,20 @@ def generate_timerange_query(start: datetime, end: datetime) -> str:
     complete_filter = "{0} AND {1}".format(time_filter, partition_filter)
 
     return complete_filter
+
+
+def is_first_date_time_greater(first_date_time: datetime, second_date_time: datetime) -> bool:
+    """
+    Returns True if the first datetime has a bigger timestamp than the second datetime.
+
+    Args:
+        first_date_time: First datetime.
+        second_date_time: Second datetime.
+
+    Returns:
+        True if the first date is after the second date, False otherwise.
+    """
+    return first_date_time.timestamp() > second_date_time.timestamp()
 
 
 class PartitionQueryBuilder(object):
