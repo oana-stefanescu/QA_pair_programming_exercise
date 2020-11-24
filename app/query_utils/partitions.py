@@ -4,6 +4,7 @@ from typing import List, Optional
 class TimeRange(object):
     """
     Holds information for a certain time range.
+
     Attributes:
         years: the years of the given time range
         months: the months of the given time range
@@ -11,8 +12,7 @@ class TimeRange(object):
         hours: list of hours of the given time range
     """
 
-    def __init__(self,
-                 years: Optional[List[int]] = None,
+    def __init__(self, years: Optional[List[int]] = None,
                  months: Optional[List[int]] = None,
                  days: Optional[List[int]] = None,
                  hours: Optional[List[int]] = None):
