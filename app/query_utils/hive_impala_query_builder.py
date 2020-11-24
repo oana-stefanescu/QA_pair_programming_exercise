@@ -63,13 +63,6 @@ class PartitionQueryBuilder:
         self.end_day = self._get_end_day()
         self.end_month = self._get_end_month()
         self.end_year = self._get_end_year()
-        self.partitions = Partitions(relevant_hours_of_start_date=self._get_relevant_hours_of_start_date(),
-                                     relevant_days_in_start_date_month=self._get_relevant_days_in_start_date_month(),
-                                     relevant_months_in_start_date_year=self._get_relevant_months_in_start_date_year(),
-                                     relevant_years=self._get_gap_years(),
-                                     relevant_hours_of_end_date=self._get_relevant_hours_of_end_date(),
-                                     relevant_days_in_end_date_month=self._get_relevant_days_in_end_date_month(),
-                                     relevant_months_in_end_date_year=self._get_relevant_months_in_end_date_year())
 
     @staticmethod
     def _get_date_part_as_int(date_time: datetime, date_part: str) -> int:
