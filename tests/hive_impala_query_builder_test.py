@@ -22,6 +22,33 @@ def test_generate_timerange_query_errors():
         generate_timerange_query(pytz.utc.localize(end_no_time_zone), start_correct_time_zone)
 
 
+def test_generate_timerange_query():
+    """
+    Test if both partitions and timestamps are generated correctly
+    """
+    start_time = datetime(year=2017, month=5, day=13, hour=15, tzinfo=pytz.utc)
+    end_time = datetime(year=2019, month=7, day=8, hour=12, tzinfo=pytz.utc)
+
+    complete_time_filter = generate_timerange_query(start_time, end_time)
+    expected = "`timestamp` BETWEEN 1494687600 AND 1562587200" \
+               " AND " \
+               "(" \
+               "(`year` = 2017 AND `month` = 5 AND `day` = 13 AND `hour` BETWEEN 15 AND 23)" \
+               " OR " \
+               "(`year` = 2017 AND `month` = 5 AND `day` BETWEEN 14 AND 31)" \
+               " OR " \
+               "(`year` = 2017 AND `month` BETWEEN 6 AND 12)" \
+               " OR " \
+               "(`year` = 2018)" \
+               " OR " \
+               "(`year` = 2019 AND `month` BETWEEN 1 AND 6)" \
+               " OR " \
+               "(`year` = 2019 AND `month` = 7 AND `day` BETWEEN 1 AND 7)" \
+               " OR " \
+               "(`year` = 2019 AND `month` = 7 AND `day` = 8 AND `hour` BETWEEN 0 AND 12)" \
+               ")"
+    assert complete_time_filter == expected
+
 def test_runtime_one_day():
     """
     Test the partitions if the report timerange is one day.
