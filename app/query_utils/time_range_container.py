@@ -1,4 +1,5 @@
 from typing import List, Optional
+
 from pydantic.dataclasses import dataclass
 from pydantic import validator
 
