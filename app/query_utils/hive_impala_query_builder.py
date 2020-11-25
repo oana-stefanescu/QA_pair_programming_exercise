@@ -295,15 +295,15 @@ class PartitionQueryBuilder(object):
         if time_range is None:
             return None
         filter_clauses = [
-            self._build_filter_for_key('year', time_range.years),
-            self._build_filter_for_key('month', time_range.months),
-            self._build_filter_for_key('day', time_range.days),
-            self._build_filter_for_key('hour', time_range.hours)
+            self._build_filter_for_key(key="year", values=time_range.years),
+            self._build_filter_for_key(key="month", values=time_range.months),
+            self._build_filter_for_key(key="day", values=time_range.days),
+            self._build_filter_for_key(key="hour", values=time_range.hours)
         ]
         # filter out `None` values
         filter_clauses = filter(lambda x: x is not None, filter_clauses)
 
-        return '({0})'.format(' AND '.join(filter_clauses))
+        return "({0})".format(" AND ".join(filter_clauses))
 
     def build_partition_filter(self) -> str:
         """
@@ -329,7 +329,7 @@ class PartitionQueryBuilder(object):
         seen_add = seen.add
         partition_filters_deduplicated = [p for p in partition_filters if not (p in seen or seen_add(p))]
 
-        return '({0})'.format(' OR '.join(partition_filters_deduplicated))
+        return "({0})".format(" OR ".join(partition_filters_deduplicated))
 
     def build_timestamp_filter(self) -> str:
         """
