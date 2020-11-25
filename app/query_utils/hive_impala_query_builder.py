@@ -281,7 +281,7 @@ class PartitionQueryBuilder(object):
         if len(values) == 1:
             return "`{0}` = {1}".format(key, str(values[0]))
         else:
-            return "`{0}` BETWEEN {1} AND {2}".format(key, str(min(values)), str(max(values)))
+            return "`{0}` BETWEEN {1} AND {2}".format(key, values[0], values[-1])
 
     def _build_partition_filter_for_timerange(self, time_range: Optional[TimeRangeContainer] = None) -> Optional[str]:
         """
