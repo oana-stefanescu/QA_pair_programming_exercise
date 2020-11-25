@@ -14,5 +14,12 @@ If no UTC offset / timezone is present the date is assumed to be in UTC:
 A result for the Impala and Hive endpoint could look like this:
 
 ```sql
-`year` = 2020 AND `month` = 11 AND `day` BETWEEN 1 AND 13
+`timestamp` BETWEEN 1606230000 AND 1606327199 AND ((`year` = 2020 AND `month` = 11 AND `day` = 24 AND `hour` BETWEEN 15 AND 23) OR (`year` = 2020 AND `month` = 11 AND `day` = 25 AND `hour` BETWEEN 0 AND 17))
 ```
+
+Both also have an option to skip the `timestamp` part (if you only want to look at the file directly for example).
+Then the result would look like this:
+
+```sql
+((`year` = 2020 AND `month` = 11 AND `day` = 24 AND `hour` BETWEEN 15 AND 23) OR (`year` = 2020 AND `month` = 11 AND `day` = 25 AND `hour` BETWEEN 0 AND 17))
+``` 
