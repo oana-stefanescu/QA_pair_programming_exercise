@@ -81,9 +81,10 @@ class PartitionQueryBuilder(object):
             List of months as integers.
         """
         if self.start_date.year == self.end_date.year:
-            month = date.month
-            if month in months:
-                months.remove(month)
+            try:
+                months.remove(date.month)
+            except ValueError:
+                pass
 
         return months
 
@@ -102,9 +103,10 @@ class PartitionQueryBuilder(object):
             List of days as integers.
         """
         if self.end_date.year == self.start_date.year and self.end_date.month == self.start_date.month:
-            day = date.day
-            if day in days:
-                days.remove(day)
+            try:
+                days.remove(date.day)
+            except ValueError:
+                pass
 
         return days
 
