@@ -21,7 +21,7 @@ serve:
 	env prometheus_multiproc_dir="$(PROMETHEUS_MULTIPROC_DIR)" $(VENV_UVICORN) app.main:app --reload --port $(PORT) --host $(HOST) --log-level debug
 
 run_tests:
-	$(VENV_PYTHON) -m pytest tests --cov  app
+	$(VENV_PYTHON) -m pytest app/tests --cov app
 
 docker_rm:
 	docker rm -f -v $(DOCKER_CONTAINER) || true
