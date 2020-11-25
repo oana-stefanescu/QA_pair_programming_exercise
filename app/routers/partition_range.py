@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Query, HTTPException
 from fastapi.responses import ORJSONResponse
@@ -6,6 +6,25 @@ from fastapi.responses import ORJSONResponse
 from ..models.partition_range_models import ImpalaPartitionRangeResponse, HivePartitionRangeResponse, QueryStringResponse
 
 router = APIRouter()
+
+
+def _convert_dt_to_utc(d: datetime) -> datetime:
+    """Convert a datetime object to a datetime with timezone set to timezone.utc.
+
+    If the datetime object is a naive object (no tzinfo set) it will be interpreted as being in UTC.
+    For example "2020-11-25 17:00:00" will be interpreted as this time in UTC.
+    "2020-11-25T17:00:00+01:00" will be interpreted as "2020-11-25 16:00:00+00:00 UTC".
+
+    Args:
+        d: The datetime to convert to utc.
+
+    Returns:
+        The datetime with tzinfo set to timezone.utc.
+    """
+    if d.tzinfo is None:
+        return d.replace(tzinfo=timezone.utc)
+    else:
+        return d.astimezone(timezone.utc)
 
 
 def _process_impala_hive_partition_query(start: datetime, end: datetime, cls: type) -> QueryStringResponse:
@@ -28,9 +47,12 @@ def _process_impala_hive_partition_query(start: datetime, end: datetime, cls: ty
     Raises:
         HTTPException: With status code 422 if end < start.
     """
+    # make sure to convert all to UTC
+    start = _convert_dt_to_utc(start)
+    end = _convert_dt_to_utc(end)
     if end < start:
         raise HTTPException(422, detail='end must be >= start date')
-    return cls('TODO insert method here')
+    return cls(query='TODO insert method here')
 
 
 @router.get('/impala', response_model=ImpalaPartitionRangeResponse, response_class=ORJSONResponse)
