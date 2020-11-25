@@ -164,7 +164,7 @@ class PartitionQueryBuilder(object):
         """
         if relativedelta(self.end_date, self.start_date).years > 0:
             years = list(range(self.start_date.year + 1, self.end_date.year))
-+           if years:
+            if years:
                 return TimeRangeContainer(years=years)
         return None
 
