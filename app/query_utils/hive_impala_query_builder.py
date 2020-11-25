@@ -27,9 +27,8 @@ def generate_timerange_query(start: datetime, end: datetime) -> str:
     partition_query_builder = PartitionQueryBuilder(start_date=start, end_date=end)
     partition_filter = partition_query_builder.build_partition_filter()
     time_filter = partition_query_builder.build_timestamp_filter()
-    complete_filter = "{0} AND {1}".format(time_filter, partition_filter)
 
-    return complete_filter
+    return "{0} AND {1}".format(time_filter, partition_filter)
 
 
 def is_first_date_time_greater(first_date_time: datetime, second_date_time: datetime) -> bool:
@@ -304,10 +303,7 @@ class PartitionQueryBuilder(object):
         # filter out `None` values
         filter_clauses = filter(lambda x: x is not None, filter_clauses)
 
-        # combine to full filter clause
-        partition_filter = '({0})'.format(' AND '.join(filter_clauses))
-
-        return partition_filter
+        return '({0})'.format(' AND '.join(filter_clauses))
 
     def build_partition_filter(self) -> str:
         """
@@ -333,10 +329,7 @@ class PartitionQueryBuilder(object):
         seen_add = seen.add
         partition_filters_deduplicated = [p for p in partition_filters if not (p in seen or seen_add(p))]
 
-        # combine to full partitioning clause
-        full_partition_filter = '({0})'.format(' OR '.join(partition_filters_deduplicated))
-
-        return full_partition_filter
+        return '({0})'.format(' OR '.join(partition_filters_deduplicated))
 
     def build_timestamp_filter(self) -> str:
         """
@@ -347,6 +340,5 @@ class PartitionQueryBuilder(object):
         """
         start_date_timestamp = int(self.start_date.timestamp())
         end_date_timestamp = int(self.end_date.timestamp())
-        timestamp_filter = "`timestamp` BETWEEN {0} AND {1}".format(start_date_timestamp, end_date_timestamp)
 
-        return timestamp_filter
+        return "`timestamp` BETWEEN {0} AND {1}".format(start_date_timestamp, end_date_timestamp)
