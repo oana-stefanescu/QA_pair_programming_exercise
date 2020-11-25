@@ -53,14 +53,6 @@ class PartitionQueryBuilder(object):
     Attributes:
         start_date: The start date in UTC.
         end_date: The end date in UTC.
-        start_hour: The hour of the start date.
-        start_day: The day of the start date.
-        start_month: The month of the start date.
-        start_year: The year of the start date.
-        end_hour: The hour of the end date.
-        end_day: The day of the end date.
-        end_month: The month of the end date.
-        end_year: The year of the end date.
     """
 
     def __init__(self, start_date: datetime, end_date: datetime):
@@ -71,42 +63,6 @@ class PartitionQueryBuilder(object):
         """
         self.start_date = start_date
         self.end_date = end_date
-        self.start_hour = self._get_start_hour()
-        self.start_day = self._get_start_day()
-        self.start_month = self._get_start_month()
-        self.start_year = self._get_start_year()
-        self.end_hour = self._get_end_hour()
-        self.end_day = self._get_end_day()
-        self.end_month = self._get_end_month()
-        self.end_year = self._get_end_year()
-
-    @staticmethod
-    def _get_date_part_as_int(date: datetime, date_part: str) -> int:
-        return int(date.strftime(date_part))
-
-    def _get_start_hour(self) -> int:
-        return self._get_date_part_as_int(self.start_date, '%H')
-
-    def _get_start_day(self) -> int:
-        return self._get_date_part_as_int(self.start_date, '%d')
-
-    def _get_start_month(self) -> int:
-        return self._get_date_part_as_int(self.start_date, '%m')
-
-    def _get_start_year(self) -> int:
-        return self._get_date_part_as_int(self.start_date, '%Y')
-
-    def _get_end_hour(self) -> int:
-        return self._get_date_part_as_int(self.end_date, '%H')
-
-    def _get_end_day(self) -> int:
-        return self._get_date_part_as_int(self.end_date, '%d')
-
-    def _get_end_month(self) -> int:
-        return self._get_date_part_as_int(self.end_date, '%m')
-
-    def _get_end_year(self) -> int:
-        return self._get_date_part_as_int(self.end_date, '%Y')
 
     def _remove_duplicate_month(self, months: List[int], date: datetime) -> List[int]:
         """
@@ -122,8 +78,8 @@ class PartitionQueryBuilder(object):
         Returns:
             List of months as integers.
         """
-        if self.start_year == self.end_year:
-            month = self._get_date_part_as_int(date, '%m')
+        if self.start_date.year == self.end_date.year:
+            month = date.month
             if month in months:
                 months.remove(month)
 
@@ -143,8 +99,8 @@ class PartitionQueryBuilder(object):
         Returns:
             List of days as integers.
         """
-        if self.end_year == self.start_year and self.end_month == self.start_month:
-            day = self._get_date_part_as_int(date, '%d')
+        if self.end_date.year == self.start_date.year and self.end_date.month == self.start_date.month:
+            day = date.day
             if day in days:
                 days.remove(day)
 
@@ -160,15 +116,15 @@ class PartitionQueryBuilder(object):
             A TimeRangeContainer object holding all the relevant hours of the start date or `None` if the start date is the same
             as the end date.
         """
-        if not (self.start_day == self.end_day
+        if not (self.start_date.day == self.end_date.day
                 and
-                self.start_month == self.end_month
+                self.start_date.month == self.end_date.month
                 and
-                self.start_year == self.end_year):
+                self.start_date.year == self.end_date.year):
             hours = []
-            for hour in range(self.start_hour, 24):
+            for hour in range(self.start_date.hour, 24):
                 hours.append(hour)
-            return TimeRangeContainer(years=[self.start_year], months=[self.start_month], days=[self.start_day], hours=hours)
+            return TimeRangeContainer(years=[self.start_date.year], months=[self.start_date.month], days=[self.start_date.day], hours=hours)
 
     def _get_relevant_hours_of_end_date(self) -> TimeRangeContainer:
         """
@@ -177,16 +133,16 @@ class PartitionQueryBuilder(object):
         Returns:
             A TimeRangeContainer object holding all the relevant hours of the end date that should be scanned.
         """
-        if self.start_day == self.end_day and self.start_month == self.end_month and self.start_year == self.end_year:
-            first_hour = self.start_hour
+        if self.start_date.day == self.end_date.day and self.start_date.month == self.end_date.month and self.start_date.year == self.end_date.year:
+            first_hour = self.start_date.hour
         else:
             first_hour = 0
 
         hours = []
-        for hour in range(first_hour, self.end_hour + 1):
+        for hour in range(first_hour, self.end_date.hour + 1):
             hours.append(hour)
 
-        return TimeRangeContainer(years=[self.end_year], months=[self.end_month], days=[self.end_day], hours=hours)
+        return TimeRangeContainer(years=[self.end_date.year], months=[self.end_date.month], days=[self.end_date.day], hours=hours)
 
     def _get_gap_years(self) -> Optional[TimeRangeContainer]:
         """
@@ -198,7 +154,7 @@ class PartitionQueryBuilder(object):
         """
         if relativedelta(self.end_date, self.start_date).years > 0:
             years = []
-            for missing_year in range(self.start_year + 1, self.end_year):
+            for missing_year in range(self.start_date.year + 1, self.end_date.year):
                 years.append(missing_year)
             if len(years) > 0:
                 return TimeRangeContainer(years=years)
@@ -212,8 +168,8 @@ class PartitionQueryBuilder(object):
             A TimeRangeContainer object holding the information about all the full days of the start date month or `None` if
             there aren't any.
         """
-        last_day_of_month = datetime(year=self.start_year, month=self.start_month,
-                                     day=monthrange(self.start_year, self.start_month)[1],
+        last_day_of_month = datetime(year=self.start_date.year, month=self.start_date.month,
+                                     day=monthrange(self.start_date.year, self.start_date.month)[1],
                                      hour=23, minute=59, second=59,
                                      tzinfo=pytz.utc)
 
@@ -226,14 +182,14 @@ class PartitionQueryBuilder(object):
                 relativedelta(date_for_diff, self.start_date).hours == 23):
             days = []
             for day in range(
-                    self.start_day + 1,
-                    self._get_date_part_as_int(date_for_diff, "%d") + 1
+                    self.start_date.day + 1,
+                    date_for_diff.day + 1
             ):
                 days.append(day)
 
             days = self._remove_duplicate_day(days, self.end_date)
             if len(days) > 0:
-                return TimeRangeContainer(years=[self.start_year], months=[self.start_month], days=days)
+                return TimeRangeContainer(years=[self.start_date.year], months=[self.start_date.month], days=days)
 
     def _get_relevant_months_in_start_date_year(self) -> Optional[TimeRangeContainer]:
         """
@@ -244,7 +200,7 @@ class PartitionQueryBuilder(object):
             A TimeRangeContainer object holding the information about all the full month of the start date year or `None` if
             there aren't any.
         """
-        last_day_of_year = datetime(year=self.start_year, month=12, day=31, hour=23, minute=59, second=59,
+        last_day_of_year = datetime(year=self.start_date.year, month=12, day=31, hour=23, minute=59, second=59,
                                     tzinfo=pytz.utc)
 
         if is_first_date_time_greater(last_day_of_year, self.end_date):
@@ -257,9 +213,9 @@ class PartitionQueryBuilder(object):
         if relativedelta(date_for_diff, self.start_date).months > 0:
             months = []
 
-            compare_month = self._get_date_part_as_int(date_for_diff, '%m')
+            compare_month = date_for_diff.month
 
-            for month in range(self.start_month + 1, compare_month):
+            for month in range(self.start_date.month + 1, compare_month):
                 months.append(month)
 
             # add also the last month if the end date is not in the current year
@@ -268,7 +224,7 @@ class PartitionQueryBuilder(object):
 
             months = self._remove_duplicate_month(months, self.start_date)
             if len(months) > 0:
-                return TimeRangeContainer(years=[self.start_year], months=months)
+                return TimeRangeContainer(years=[self.start_date.year], months=months)
 
     def _get_relevant_days_in_end_date_month(self) -> Optional[TimeRangeContainer]:
         """
@@ -279,7 +235,7 @@ class PartitionQueryBuilder(object):
             A TimeRangeContainer object holding the information about all the full days of the end date month or `None` if
             there aren't any.
         """
-        first_day_of_end_date_month = datetime(year=self.end_year, month=self.end_month, day=1, tzinfo=pytz.utc)
+        first_day_of_end_date_month = datetime(year=self.end_date.year, month=self.end_date.month, day=1, tzinfo=pytz.utc)
 
         if is_first_date_time_greater(self.start_date, first_day_of_end_date_month):
             date_for_diff = self.start_date
@@ -290,14 +246,14 @@ class PartitionQueryBuilder(object):
                 relativedelta(self.end_date, date_for_diff).days > 0):
             days = []
             for day in range(
-                    self._get_date_part_as_int(date_for_diff, '%d'),
-                    self.end_day
+                    date_for_diff.day,
+                    self.end_date.day
             ):
                 days.append(day)
 
             days = self._remove_duplicate_day(days, self.start_date)
             if len(days) > 0:
-                return TimeRangeContainer(years=[self.end_year], months=[self.end_month], days=days)
+                return TimeRangeContainer(years=[self.end_date.year], months=[self.end_date.month], days=days)
 
     def _get_relevant_months_in_end_date_year(self) -> Optional[TimeRangeContainer]:
         """
@@ -308,7 +264,7 @@ class PartitionQueryBuilder(object):
             A TimeRangeContainer object holding the information about all the full month of the end date year or `None` if
             there aren't any.
         """
-        first_day_of_end_date_year = datetime(year=self.end_year, month=1, day=1, tzinfo=pytz.utc)
+        first_day_of_end_date_year = datetime(year=self.end_date.year, month=1, day=1, tzinfo=pytz.utc)
 
         if is_first_date_time_greater(self.start_date, first_day_of_end_date_year):
             date_for_diff = self.start_date
@@ -318,14 +274,14 @@ class PartitionQueryBuilder(object):
         if relativedelta(self.end_date, date_for_diff).months > 0:
             months = []
             for month in range(
-                    self._get_date_part_as_int(date_for_diff, '%m'),
-                    self.end_month
+                    date_for_diff.month,
+                    self.end_date.month
             ):
                 months.append(month)
 
             months = self._remove_duplicate_month(months, self.start_date)
             if len(months) > 0:
-                return TimeRangeContainer(years=[self.end_year], months=months)
+                return TimeRangeContainer(years=[self.end_date.year], months=months)
 
     @staticmethod
     def _build_filter_for_key(key: str, values: Optional[List[int]] = None) -> Optional[str]:
