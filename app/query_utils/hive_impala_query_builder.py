@@ -302,7 +302,7 @@ class PartitionQueryBuilder(object):
             self._build_filter_for_key('hour', time_range.hours)
         ]
         # filter out `None` values
-        filter_clauses = list(filter(lambda x: x is not None, filter_clauses))
+        filter_clauses = filter(lambda x: x is not None, filter_clauses)
 
         # combine to full filter clause
         partition_filter = '({0})'.format(' AND '.join(filter_clauses))
@@ -326,7 +326,7 @@ class PartitionQueryBuilder(object):
             self._build_partition_filter_for_timerange(self._get_relevant_hours_of_end_date())
         ]
         # filter out `None` values
-        partition_filters = list(filter(lambda x: x is not None, partition_filters))
+        partition_filters = filter(lambda x: x is not None, partition_filters)
 
         # remove duplicates but keep order
         seen = set()
