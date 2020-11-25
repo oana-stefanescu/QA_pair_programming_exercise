@@ -1,5 +1,4 @@
-from datetime import datetime
-import pytz
+from datetime import datetime, timezone, timedelta
 import pytest
 
 from ..query_utils.hive_impala_query_builder import PartitionQueryBuilder, generate_timerange_query
@@ -11,22 +10,23 @@ def test_generate_timerange_query_errors():
     """
     start_no_time_zone = datetime(year=2017, month=5, day=13, hour=22)
     end_no_time_zone = datetime(year=2019, month=5, day=14, hour=22)
-    start_correct_time_zone = datetime(year=2017, month=5, day=13, hour=22, tzinfo=pytz.utc)
-    end_wrong_time_zone = datetime(year=2017, month=5, day=14, hour=22, tzinfo=pytz.timezone("US/Eastern"))
+    start_correct_time_zone = datetime(year=2017, month=5, day=13, hour=22, tzinfo=timezone.utc)
+    end_wrong_time_zone = datetime(year=2017, month=5, day=14, hour=22, tzinfo=timezone(timedelta(hours=3)))
+    end_before_start = datetime(year=2016, month=5, day=13, hour=22, tzinfo=timezone.utc)
     with pytest.raises(ValueError, match="Start date has to be in UTC"):
         generate_timerange_query(start_no_time_zone, end_no_time_zone)
     with pytest.raises(ValueError, match="End date has to be in UTC"):
         generate_timerange_query(start_correct_time_zone, end_wrong_time_zone)
     with pytest.raises(ValueError, match="Start date has to be before the end date"):
-        generate_timerange_query(pytz.utc.localize(end_no_time_zone), start_correct_time_zone)
+        generate_timerange_query(start_correct_time_zone, end_before_start)
 
 
 def test_generate_timerange_query():
     """
     Test if both partitions and timestamps are generated correctly
     """
-    start_time = datetime(year=2017, month=5, day=13, hour=15, tzinfo=pytz.utc)
-    end_time = datetime(year=2019, month=7, day=8, hour=12, tzinfo=pytz.utc)
+    start_time = datetime(year=2017, month=5, day=13, hour=15, tzinfo=timezone.utc)
+    end_time = datetime(year=2019, month=7, day=8, hour=12, tzinfo=timezone.utc)
 
     complete_time_filter = generate_timerange_query(start_time, end_time)
     expected = "`timestamp` BETWEEN 1494687600 AND 1562587200" \
@@ -53,8 +53,8 @@ def test_runtime_one_day():
     Test the partitions if the report timerange is one day.
     """
     query_builder = PartitionQueryBuilder(
-        datetime(year=2017, month=5, day=13, hour=22, tzinfo=pytz.utc),
-        datetime(year=2017, month=5, day=14, hour=21, minute=59, second=59, tzinfo=pytz.utc)
+        datetime(year=2017, month=5, day=13, hour=22, tzinfo=timezone.utc),
+        datetime(year=2017, month=5, day=14, hour=21, minute=59, second=59, tzinfo=timezone.utc)
     )
 
     expected = "(" \
@@ -73,8 +73,8 @@ def test_runtime_two_days():
     Test the partitions if the report timerange has two days.
     """
     query_builder = PartitionQueryBuilder(
-        datetime(year=2017, month=5, day=12, hour=22, tzinfo=pytz.utc),
-        datetime(year=2017, month=5, day=14, hour=21, minute=59, second=59, tzinfo=pytz.utc)
+        datetime(year=2017, month=5, day=12, hour=22, tzinfo=timezone.utc),
+        datetime(year=2017, month=5, day=14, hour=21, minute=59, second=59, tzinfo=timezone.utc)
     )
     expected = "(" \
                "(`year` = 2017 AND `month` = 5 AND `day` = 12 AND `hour` BETWEEN 22 AND 23)" \
@@ -94,8 +94,8 @@ def test_runtime_one_month():
     Test the partitions if the start date and end date are at different months.
     """
     query_builder = PartitionQueryBuilder(
-        datetime(year=2017, month=4, day=12, hour=22, tzinfo=pytz.utc),
-        datetime(year=2017, month=5, day=14, hour=23, minute=59, second=59, tzinfo=pytz.utc)
+        datetime(year=2017, month=4, day=12, hour=22, tzinfo=timezone.utc),
+        datetime(year=2017, month=5, day=14, hour=23, minute=59, second=59, tzinfo=timezone.utc)
     )
     expected = "(" \
                "(`year` = 2017 AND `month` = 4 AND `day` = 12 AND `hour` BETWEEN 22 AND 23)" \
@@ -114,8 +114,8 @@ def test_runtime_two_months():
     Test the partitions for more than one month.
     """
     query_builder = PartitionQueryBuilder(
-        datetime(year=2017, month=3, day=12, hour=23, tzinfo=pytz.utc),
-        datetime(year=2017, month=5, day=14, hour=23, minute=59, second=59, tzinfo=pytz.utc)
+        datetime(year=2017, month=3, day=12, hour=23, tzinfo=timezone.utc),
+        datetime(year=2017, month=5, day=14, hour=23, minute=59, second=59, tzinfo=timezone.utc)
     )
     expected = "(" \
                "(`year` = 2017 AND `month` = 3 AND `day` = 12 AND `hour` = 23)" \
@@ -136,8 +136,8 @@ def test_more_than_one_year():
     Test if the partitions are calculated correctly when the time difference is more than two years.
     """
     query_builder = PartitionQueryBuilder(
-        datetime(year=2014, month=1, day=25, hour=23, tzinfo=pytz.utc),
-        datetime(year=2017, month=5, day=26, hour=21, minute=59, second=59, tzinfo=pytz.utc)
+        datetime(year=2014, month=1, day=25, hour=23, tzinfo=timezone.utc),
+        datetime(year=2017, month=5, day=26, hour=21, minute=59, second=59, tzinfo=timezone.utc)
     )
 
     expected = "(" \
@@ -164,8 +164,8 @@ def test_end_date_january_next_year():
     """
 
     query_builder = PartitionQueryBuilder(
-        datetime(year=2014, month=1, day=25, hour=23, tzinfo=pytz.utc),
-        datetime(year=2015, month=1, day=2, hour=22, minute=59, second=59, tzinfo=pytz.utc)
+        datetime(year=2014, month=1, day=25, hour=23, tzinfo=timezone.utc),
+        datetime(year=2015, month=1, day=2, hour=22, minute=59, second=59, tzinfo=timezone.utc)
     )
 
     expected = "(" \
@@ -188,8 +188,8 @@ def test_end_date_first_january():
     Test the change of the years. Here the end date wil be in 1st January.
     """
     query_builder = PartitionQueryBuilder(
-        datetime(year=2014, month=1, day=25, hour=23, tzinfo=pytz.utc),
-        datetime(year=2015, month=1, day=1, hour=22, minute=59, second=59, tzinfo=pytz.utc)
+        datetime(year=2014, month=1, day=25, hour=23, tzinfo=timezone.utc),
+        datetime(year=2015, month=1, day=1, hour=22, minute=59, second=59, tzinfo=timezone.utc)
     )
 
     expected = "(" \
@@ -211,8 +211,8 @@ def test_end_date_january_in_two_years():
     """
 
     query_builder = PartitionQueryBuilder(
-        datetime(year=2014, month=1, day=25, hour=23, tzinfo=pytz.utc),
-        datetime(year=2016, month=1, day=1, hour=22, minute=59, second=59, tzinfo=pytz.utc)
+        datetime(year=2014, month=1, day=25, hour=23, tzinfo=timezone.utc),
+        datetime(year=2016, month=1, day=1, hour=22, minute=59, second=59, tzinfo=timezone.utc)
     )
     expected = "(" \
                "(`year` = 2014 AND `month` = 1 AND `day` = 25 AND `hour` = 23)" \
@@ -233,8 +233,8 @@ def test_one_second_diff():
     Test the runtime when there is one second difference.
     """
     query_builder = PartitionQueryBuilder(
-        datetime(year=2017, month=8, day=24, hour=7, minute=58, second=8, tzinfo=pytz.utc),
-        datetime(year=2017, month=8, day=24, hour=7, minute=58, second=9, tzinfo=pytz.utc)
+        datetime(year=2017, month=8, day=24, hour=7, minute=58, second=8, tzinfo=timezone.utc),
+        datetime(year=2017, month=8, day=24, hour=7, minute=58, second=9, tzinfo=timezone.utc)
     )
 
     expected = "((`year` = 2017 AND `month` = 8 AND `day` = 24 AND `hour` = 7))"
@@ -247,8 +247,8 @@ def test_one_second_diff_in_different_hours():
     Test the runtime when there is one second difference.
     """
     query_builder = PartitionQueryBuilder(
-        datetime(year=2017, month=8, day=24, hour=7, minute=59, second=59, tzinfo=pytz.utc),
-        datetime(year=2017, month=8, day=24, hour=8, tzinfo=pytz.utc)
+        datetime(year=2017, month=8, day=24, hour=7, minute=59, second=59, tzinfo=timezone.utc),
+        datetime(year=2017, month=8, day=24, hour=8, tzinfo=timezone.utc)
     )
 
     expected = "((`year` = 2017 AND `month` = 8 AND `day` = 24 AND `hour` BETWEEN 7 AND 8))"
@@ -262,8 +262,8 @@ def test_several_years():
     """
 
     query_builder = PartitionQueryBuilder(
-        datetime(year=2014, month=1, day=1, hour=0, tzinfo=pytz.utc),
-        datetime(year=2020, month=12, day=31, hour=23, minute=59, second=59, tzinfo=pytz.utc)
+        datetime(year=2014, month=1, day=1, hour=0, tzinfo=timezone.utc),
+        datetime(year=2020, month=12, day=31, hour=23, minute=59, second=59, tzinfo=timezone.utc)
     )
 
     expected = "(" \

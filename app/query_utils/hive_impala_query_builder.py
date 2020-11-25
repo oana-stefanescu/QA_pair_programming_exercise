@@ -1,6 +1,5 @@
 from calendar import monthrange
-from datetime import datetime
-import pytz
+from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
 from collections import OrderedDict
 
@@ -21,9 +20,9 @@ def generate_timerange_query(start: datetime, end: datetime) -> str:
     Returns:
         The partition query string.
     """
-    if start.tzinfo != pytz.utc:
+    if start.tzinfo != timezone.utc:
         raise ValueError("Start date has to be in UTC. Instead we have %s" % str(start.tzinfo))
-    if end.tzinfo != pytz.utc:
+    if end.tzinfo != timezone.utc:
         raise ValueError("End date has to be in UTC. Instead we have %s" % str(end.tzinfo))
     if start > end:
         raise ValueError("Start date has to be before the end date. You have start:%s \tend:%s" % (start, end))
@@ -179,7 +178,7 @@ class PartitionQueryBuilder(object):
         last_day_of_month = datetime(year=self.start_date.year, month=self.start_date.month,
                                      day=monthrange(self.start_date.year, self.start_date.month)[1],
                                      hour=23, minute=59, second=59,
-                                     tzinfo=pytz.utc)
+                                     tzinfo=timezone.utc)
 
         if last_day_of_month > self.end_date:
             date_for_diff = self.end_date
@@ -204,7 +203,7 @@ class PartitionQueryBuilder(object):
             `None` if there aren't any.
         """
         last_day_of_year = datetime(year=self.start_date.year, month=12, day=31, hour=23, minute=59, second=59,
-                                    tzinfo=pytz.utc)
+                                    tzinfo=timezone.utc)
 
         if last_day_of_year > self.end_date:
             date_for_diff = self.end_date
@@ -235,7 +234,7 @@ class PartitionQueryBuilder(object):
             if there aren't any.
         """
         first_day_of_end_date_month = datetime(year=self.end_date.year, month=self.end_date.month, day=1,
-                                               tzinfo=pytz.utc)
+                                               tzinfo=timezone.utc)
 
         if self.start_date > first_day_of_end_date_month:
             date_for_diff = self.start_date
@@ -259,7 +258,7 @@ class PartitionQueryBuilder(object):
             A TimeRangeContainer object holding the information about all the full month of the end date year or `None`
             if there aren't any.
         """
-        first_day_of_end_date_year = datetime(year=self.end_date.year, month=1, day=1, tzinfo=pytz.utc)
+        first_day_of_end_date_year = datetime(year=self.end_date.year, month=1, day=1, tzinfo=timezone.utc)
 
         if self.start_date > first_day_of_end_date_year:
             date_for_diff = self.start_date
