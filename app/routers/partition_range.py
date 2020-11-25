@@ -3,7 +3,9 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Query, HTTPException
 from fastapi.responses import ORJSONResponse
 
-from ..models.partition_range_models import ImpalaPartitionRangeResponse, HivePartitionRangeResponse, QueryStringResponse
+from ..models.partition_range_models import ImpalaPartitionRangeResponse, HivePartitionRangeResponse, \
+    QueryStringResponse
+from ..query_utils.hive_impala_query_builder import generate_timerange_query
 
 router = APIRouter()
 
@@ -27,7 +29,8 @@ def _convert_dt_to_utc(d: datetime) -> datetime:
         return d.astimezone(timezone.utc)
 
 
-def _process_impala_hive_partition_query(start: datetime, end: datetime, cls: type) -> QueryStringResponse:
+def _process_impala_hive_partition_query(start: datetime, end: datetime, generate_timestamp_clause: bool,
+                                         cls: type) -> QueryStringResponse:
     """Process a call to the impala / hive endpoint.
 
     This function will call the function to generate the query string. If further checks if end >= start, if not it will
@@ -52,7 +55,7 @@ def _process_impala_hive_partition_query(start: datetime, end: datetime, cls: ty
     end = _convert_dt_to_utc(end)
     if end < start:
         raise HTTPException(422, detail='end must be >= start date')
-    return cls(query='TODO insert method here')
+    return cls(query=generate_timerange_query(start, end, generate_timestamp_clause))
 
 
 @router.get('/impala', response_model=ImpalaPartitionRangeResponse, response_class=ORJSONResponse)
@@ -65,8 +68,13 @@ async def impala_partition_query(
                               title='end',
                               description='The end date time the time range should include, only all information up '
                                           'to hour is used, so for example minutes and seconds are ignored. Must be '
-                                          '>= start.')):
-    return _process_impala_hive_partition_query(start, end, ImpalaPartitionRangeResponse)
+                                          '>= start.'),
+        generate_timestamp_clause: bool = Query(True,
+                                                title='Timestamp Clause',
+                                                description='If true not only create the partition range in the query '
+                                                            'but also a timestamp clause based on the start and end '
+                                                            'date')):
+    return _process_impala_hive_partition_query(start, end, generate_timestamp_clause, ImpalaPartitionRangeResponse)
 
 
 @router.get('/hive', response_model=HivePartitionRangeResponse, response_class=ORJSONResponse)
@@ -79,5 +87,10 @@ async def hive_partition_query(
                               title='end',
                               description='The end date time the time range should include, only all information up '
                                           'to hour is used, so for example minutes and seconds are ignored. Must be '
-                                          '>= start.')):
-    return _process_impala_hive_partition_query(start, end, HivePartitionRangeResponse)
+                                          '>= start.'),
+        generate_timestamp_clause: bool = Query(True,
+                                                title='Timestamp Clause',
+                                                description='If true not only create the partition range in the query '
+                                                            'but also a timestamp clause based on the start and end '
+                                                            'date')):
+    return _process_impala_hive_partition_query(start, end, generate_timestamp_clause, HivePartitionRangeResponse)
