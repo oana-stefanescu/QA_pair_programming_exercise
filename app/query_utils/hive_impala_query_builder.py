@@ -119,11 +119,13 @@ class PartitionQueryBuilder(object):
             A TimeRangeContainer object holding all the relevant hours of the start date or `None` if the start date is
             the same as the end date.
         """
-        if not (self.start_date.day == self.end_date.day
-                and
-                self.start_date.month == self.end_date.month
-                and
-                self.start_date.year == self.end_date.year):
+        if (self.start_date.day == self.end_date.day
+           and
+           self.start_date.month == self.end_date.month
+           and
+           self.start_date.year == self.end_date.year):
+            return None
+        else:
             hours = list(range(self.start_date.hour, 24))
             return TimeRangeContainer(years=[self.start_date.year],
                                       months=[self.start_date.month],
@@ -163,6 +165,7 @@ class PartitionQueryBuilder(object):
             years = list(range(self.start_date.year + 1, self.end_date.year))
             if len(years) > 0:
                 return TimeRangeContainer(years=years)
+        return None
 
     def _get_relevant_days_in_start_date_month(self) -> Optional[TimeRangeContainer]:
         """
@@ -189,6 +192,7 @@ class PartitionQueryBuilder(object):
             days = self._remove_duplicate_day(days, self.end_date)
             if len(days) > 0:
                 return TimeRangeContainer(years=[self.start_date.year], months=[self.start_date.month], days=days)
+        return None
 
     def _get_relevant_months_in_start_date_year(self) -> Optional[TimeRangeContainer]:
         """
@@ -219,6 +223,7 @@ class PartitionQueryBuilder(object):
             months = self._remove_duplicate_month(months, self.start_date)
             if len(months) > 0:
                 return TimeRangeContainer(years=[self.start_date.year], months=months)
+        return None
 
     def _get_relevant_days_in_end_date_month(self) -> Optional[TimeRangeContainer]:
         """
@@ -243,6 +248,7 @@ class PartitionQueryBuilder(object):
             days = self._remove_duplicate_day(days, self.start_date)
             if len(days) > 0:
                 return TimeRangeContainer(years=[self.end_date.year], months=[self.end_date.month], days=days)
+        return None
 
     def _get_relevant_months_in_end_date_year(self) -> Optional[TimeRangeContainer]:
         """
@@ -265,6 +271,7 @@ class PartitionQueryBuilder(object):
             months = self._remove_duplicate_month(months, self.start_date)
             if len(months) > 0:
                 return TimeRangeContainer(years=[self.end_date.year], months=months)
+        return None
 
     @staticmethod
     def _build_filter_for_key(key: str, values: Optional[List[int]] = None) -> Optional[str]:
