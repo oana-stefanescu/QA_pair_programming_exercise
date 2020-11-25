@@ -6,13 +6,15 @@ from collections import OrderedDict
 from app.query_utils.time_range_container import *
 
 
-def generate_timerange_query(start: datetime, end: datetime) -> str:
+def generate_timerange_query(start: datetime, end: datetime, generate_timestamp_clause: bool = True) -> str:
     """
     Generates the timerange query for partitioning that suits both hive and impala queries.
 
     Args:
         start: The start date in UTC.
         end: The end date in UTC.
+        generate_timestamp_clause: If True append a timestamp BETWEEN clause to the query (with the corresponding
+            start and end timestamps).
 
     Raises:
         ValueError: If start date or end date is not in UTC or if start date is after end date.
@@ -29,9 +31,11 @@ def generate_timerange_query(start: datetime, end: datetime) -> str:
 
     partition_query_builder = PartitionQueryBuilder(start_date=start, end_date=end)
     partition_filter = partition_query_builder.build_partition_filter()
-    time_filter = partition_query_builder.build_timestamp_filter()
-
-    return "{0} AND {1}".format(time_filter, partition_filter)
+    if generate_timestamp_clause:
+        time_filter = partition_query_builder.build_timestamp_filter()
+        return "{0} AND {1}".format(time_filter, partition_filter)
+    else:
+        return partition_filter
 
 
 class PartitionQueryBuilder(object):

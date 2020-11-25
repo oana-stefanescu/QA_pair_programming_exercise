@@ -48,6 +48,32 @@ def test_generate_timerange_query():
                ")"
     assert complete_time_filter == expected
 
+
+def test_generate_timerange_query_without_timestamp_clause():
+    """Test if both partitions correctly and timestamps are ignored.
+    """
+    start_time = datetime(year=2017, month=5, day=13, hour=15, tzinfo=timezone.utc)
+    end_time = datetime(year=2019, month=7, day=8, hour=12, tzinfo=timezone.utc)
+
+    complete_time_filter = generate_timerange_query(start_time, end_time, generate_timestamp_clause=False)
+    expected = "(" \
+               "(`year` = 2017 AND `month` = 5 AND `day` = 13 AND `hour` BETWEEN 15 AND 23)" \
+               " OR " \
+               "(`year` = 2017 AND `month` = 5 AND `day` BETWEEN 14 AND 31)" \
+               " OR " \
+               "(`year` = 2017 AND `month` BETWEEN 6 AND 12)" \
+               " OR " \
+               "(`year` = 2018)" \
+               " OR " \
+               "(`year` = 2019 AND `month` BETWEEN 1 AND 6)" \
+               " OR " \
+               "(`year` = 2019 AND `month` = 7 AND `day` BETWEEN 1 AND 7)" \
+               " OR " \
+               "(`year` = 2019 AND `month` = 7 AND `day` = 8 AND `hour` BETWEEN 0 AND 12)" \
+               ")"
+    assert complete_time_filter == expected
+
+
 def test_runtime_one_day():
     """
     Test the partitions if the report timerange is one day.
