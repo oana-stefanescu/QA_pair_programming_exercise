@@ -10,3 +10,4 @@ freezegun
 prometheus_client<0.9.0,>=0.8.0
 prometheus-fastapi-instrumentator>=5.5.1
 python-dateutil
+pydantic
