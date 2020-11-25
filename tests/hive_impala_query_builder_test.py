@@ -95,7 +95,7 @@ def test_runtime_one_month():
     """
     query_builder = PartitionQueryBuilder(
         datetime(year=2017, month=4, day=12, hour=22, tzinfo=pytz.utc),
-        datetime(year=2017, month=5, day=14, hour=23,minute=59, second=59, tzinfo=pytz.utc)
+        datetime(year=2017, month=5, day=14, hour=23, minute=59, second=59, tzinfo=pytz.utc)
     )
     expected = "(" \
                "(`year` = 2017 AND `month` = 4 AND `day` = 12 AND `hour` BETWEEN 22 AND 23)" \
