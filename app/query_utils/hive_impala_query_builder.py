@@ -2,6 +2,7 @@ from calendar import monthrange
 from datetime import datetime
 import pytz
 from dateutil.relativedelta import relativedelta
+from collections import OrderedDict
 
 from app.query_utils.time_range_container import *
 
@@ -325,9 +326,8 @@ class PartitionQueryBuilder(object):
         partition_filters = filter(lambda x: x is not None, partition_filters)
 
         # remove duplicates but keep order
-        seen = set()
-        seen_add = seen.add
-        partition_filters_deduplicated = [p for p in partition_filters if not (p in seen or seen_add(p))]
+        d = OrderedDict((e, True) for e in partition_filters)
+        partition_filters_deduplicated = d.keys()
 
         return "({0})".format(" OR ".join(partition_filters_deduplicated))
 
