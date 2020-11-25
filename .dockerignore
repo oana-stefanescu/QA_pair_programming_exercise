@@ -1,3 +1,7 @@
+# IDE
+/.idea
+# tmp directory used for prometheus multiprocess
+/prometheus-tmp
 __pycache__
 *.pyc
 *.pyo
