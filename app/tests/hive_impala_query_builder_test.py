@@ -2,7 +2,7 @@ from datetime import datetime
 import pytz
 import pytest
 
-from app.query_utils.hive_impala_query_builder import PartitionQueryBuilder, generate_timerange_query
+from ..query_utils.hive_impala_query_builder import PartitionQueryBuilder, generate_timerange_query
 
 
 def test_generate_timerange_query_errors():
