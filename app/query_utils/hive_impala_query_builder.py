@@ -15,6 +15,9 @@ def generate_timerange_query(start: datetime, end: datetime) -> str:
         start: The start date in UTC.
         end: The end date in UTC.
 
+    Raises:
+        ValueError: If start date or end date is not in UTC or if start date is after end date.
+
     Returns:
         The partition query string.
     """
@@ -22,7 +25,7 @@ def generate_timerange_query(start: datetime, end: datetime) -> str:
         raise ValueError("Start date has to be in UTC. Instead we have %s" % str(start.tzinfo))
     if end.tzinfo != pytz.utc:
         raise ValueError("End date has to be in UTC. Instead we have %s" % str(end.tzinfo))
-    if is_first_date_time_greater(start, end):
+    if start > end:
         raise ValueError("Start date has to be before the end date. You have start:%s \tend:%s" % (start, end))
 
     partition_query_builder = PartitionQueryBuilder(start_date=start, end_date=end)
@@ -175,7 +178,7 @@ class PartitionQueryBuilder(object):
                                      hour=23, minute=59, second=59,
                                      tzinfo=pytz.utc)
 
-        if is_first_date_time_greater(last_day_of_month, self.end_date):
+        if last_day_of_month > self.end_date:
             date_for_diff = self.end_date
         else:
             date_for_diff = last_day_of_month
@@ -199,7 +202,7 @@ class PartitionQueryBuilder(object):
         last_day_of_year = datetime(year=self.start_date.year, month=12, day=31, hour=23, minute=59, second=59,
                                     tzinfo=pytz.utc)
 
-        if is_first_date_time_greater(last_day_of_year, self.end_date):
+        if last_day_of_year > self.end_date:
             date_for_diff = self.end_date
             add_compare_month = False
         else:
@@ -229,7 +232,7 @@ class PartitionQueryBuilder(object):
         first_day_of_end_date_month = datetime(year=self.end_date.year, month=self.end_date.month, day=1,
                                                tzinfo=pytz.utc)
 
-        if is_first_date_time_greater(self.start_date, first_day_of_end_date_month):
+        if self.start_date > first_day_of_end_date_month:
             date_for_diff = self.start_date
         else:
             date_for_diff = first_day_of_end_date_month
@@ -252,7 +255,7 @@ class PartitionQueryBuilder(object):
         """
         first_day_of_end_date_year = datetime(year=self.end_date.year, month=1, day=1, tzinfo=pytz.utc)
 
-        if is_first_date_time_greater(self.start_date, first_day_of_end_date_year):
+        if self.start_date > first_day_of_end_date_year:
             date_for_diff = self.start_date
         else:
             date_for_diff = first_day_of_end_date_year
