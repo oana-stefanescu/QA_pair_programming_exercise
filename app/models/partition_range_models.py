@@ -2,8 +2,7 @@ from pydantic import BaseModel, Field
 
 
 class QueryStringResponse(BaseModel):
-    """This class is the base class for returning a query string. It has a single attribute (query) which contains the
-    (sub-)query string.
+    """This response a single field query which is the query string to be used in a WHERE clause.
     """
     query: str = Field(...,
                        title='Query',
@@ -12,7 +11,9 @@ class QueryStringResponse(BaseModel):
     class Config:
         schema_extra = {
             'example': {
-                'query': '`year` = 2020 AND `month` = 11 AND `day` BETWEEN 1 AND 13'
+                'query': '`timestamp` BETWEEN 1606230000 AND 1606327199 AND ((`year` = 2020 AND `month` = 11 AND '
+                         '`day` = 24 AND `hour` BETWEEN 15 AND 23) OR (`year` = 2020 AND `month` = 11 AND `day` = 25 '
+                         'AND `hour` BETWEEN 0 AND 17))'
             }
         }
 
