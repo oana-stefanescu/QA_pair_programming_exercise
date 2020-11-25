@@ -121,9 +121,7 @@ class PartitionQueryBuilder(object):
                 self.start_date.month == self.end_date.month
                 and
                 self.start_date.year == self.end_date.year):
-            hours = []
-            for hour in range(self.start_date.hour, 24):
-                hours.append(hour)
+            hours = list(range(self.start_date.hour, 24))
             return TimeRangeContainer(years=[self.start_date.year],
                                       months=[self.start_date.month],
                                       days=[self.start_date.day],
@@ -143,9 +141,7 @@ class PartitionQueryBuilder(object):
         else:
             first_hour = 0
 
-        hours = []
-        for hour in range(first_hour, self.end_date.hour + 1):
-            hours.append(hour)
+        hours = list(range(first_hour, self.end_date.hour + 1))
 
         return TimeRangeContainer(years=[self.end_date.year],
                                   months=[self.end_date.month],
@@ -161,9 +157,7 @@ class PartitionQueryBuilder(object):
             that should be scanned completely or `None` if there aren't any.
         """
         if relativedelta(self.end_date, self.start_date).years > 0:
-            years = []
-            for missing_year in range(self.start_date.year + 1, self.end_date.year):
-                years.append(missing_year)
+            years = list(range(self.start_date.year + 1, self.end_date.year))
             if len(years) > 0:
                 return TimeRangeContainer(years=years)
 
@@ -188,13 +182,7 @@ class PartitionQueryBuilder(object):
 
         if (relativedelta(date_for_diff, self.start_date).days > 0 or
                 relativedelta(date_for_diff, self.start_date).hours == 23):
-            days = []
-            for day in range(
-                    self.start_date.day + 1,
-                    date_for_diff.day + 1
-            ):
-                days.append(day)
-
+            days = list(range(self.start_date.day + 1, date_for_diff.day + 1))
             days = self._remove_duplicate_day(days, self.end_date)
             if len(days) > 0:
                 return TimeRangeContainer(years=[self.start_date.year], months=[self.start_date.month], days=days)
@@ -219,17 +207,12 @@ class PartitionQueryBuilder(object):
             add_compare_month = True
 
         if relativedelta(date_for_diff, self.start_date).months > 0:
-            months = []
 
             compare_month = date_for_diff.month
-
-            for month in range(self.start_date.month + 1, compare_month):
-                months.append(month)
-
+            months = list(range(self.start_date.month + 1, compare_month))
             # add also the last month if the end date is not in the current year
             if add_compare_month:
                 months.append(compare_month)
-
             months = self._remove_duplicate_month(months, self.start_date)
             if len(months) > 0:
                 return TimeRangeContainer(years=[self.start_date.year], months=months)
@@ -253,13 +236,7 @@ class PartitionQueryBuilder(object):
 
         if (relativedelta(self.end_date, date_for_diff).months > 0 or
                 relativedelta(self.end_date, date_for_diff).days > 0):
-            days = []
-            for day in range(
-                    date_for_diff.day,
-                    self.end_date.day
-            ):
-                days.append(day)
-
+            days = list(range(date_for_diff.day, self.end_date.day))
             days = self._remove_duplicate_day(days, self.start_date)
             if len(days) > 0:
                 return TimeRangeContainer(years=[self.end_date.year], months=[self.end_date.month], days=days)
@@ -281,13 +258,7 @@ class PartitionQueryBuilder(object):
             date_for_diff = first_day_of_end_date_year
 
         if relativedelta(self.end_date, date_for_diff).months > 0:
-            months = []
-            for month in range(
-                    date_for_diff.month,
-                    self.end_date.month
-            ):
-                months.append(month)
-
+            months = list(range(date_for_diff.month, self.end_date.month))
             months = self._remove_duplicate_month(months, self.start_date)
             if len(months) > 0:
                 return TimeRangeContainer(years=[self.end_date.year], months=months)
