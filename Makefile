@@ -2,6 +2,7 @@
 
 VENV_PIP=./venv/bin/pip
 VENV_UVICORN=./venv/bin/uvicorn
+VENV_PYTHON=./venv/bin/python
 BI_PYPI=https://repo2.rz.adition.net/repository/bi-pipy/simple/
 DOCKER_IMAGE:=partitioning-service
 DOCKER_CONTAINER:=partitioning-service
@@ -18,6 +19,9 @@ venv:
 serve:
 	./prepare_prometheus_multiprocess_local.sh
 	env prometheus_multiproc_dir="$(PROMETHEUS_MULTIPROC_DIR)" $(VENV_UVICORN) app.main:app --reload --port $(PORT) --host $(HOST) --log-level debug
+
+run_tests:
+	$(VENV_PYTHON) -m pytest app/tests --cov app
 
 docker_rm:
 	docker rm -f -v $(DOCKER_CONTAINER) || true
