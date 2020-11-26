@@ -52,7 +52,7 @@ def _process_impala_hive_partition_query(start: datetime, end: datetime, generat
     start = _convert_dt_to_utc(start)
     end = _convert_dt_to_utc(end)
     if end < start:
-        raise HTTPException(422, detail='end must be >= start date')
+        raise HTTPException(422, detail='end date can not be before start date')
     return QueryStringResponse(query=generate_timerange_query(start, end, generate_timestamp_clause))
 
 
