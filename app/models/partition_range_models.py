@@ -16,11 +16,3 @@ class QueryStringResponse(BaseModel):
                          'AND `hour` BETWEEN 0 AND 17))'
             }
         }
-
-
-class ImpalaPartitionRangeResponse(QueryStringResponse):
-    pass
-
-
-class HivePartitionRangeResponse(QueryStringResponse):
-    pass
