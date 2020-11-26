@@ -60,18 +60,17 @@ def _process_impala_hive_partition_query(start: datetime, end: datetime, generat
 async def impala_partition_query(
         start: datetime = Query(...,
                                 title='start',
-                                description='The start date time the time range should include, only all information '
-                                            'up to hour is used, so for example minutes and seconds are ignored.'),
+                                description='The start date of the time range.'),
         end: datetime = Query(...,
                               title='end',
-                              description='The end date time the time range should include, only all information up '
-                                          'to hour is used, so for example minutes and seconds are ignored. Must be '
-                                          '>= start.'),
+                              description='The start date of the time range. Must be >= start.'),
         generate_timestamp_clause: bool = Query(True,
                                                 title='Timestamp Clause',
                                                 description='If true not only create the partition range in the query '
                                                             'but also a timestamp clause based on the start and end '
-                                                            'date')):
+                                                            'date. If False every part after hour (minute, '
+                                                            'seconds) will not be covered by the partition (partitions '
+                                                            'are based on hours).')):
     return _process_impala_hive_partition_query(start, end, generate_timestamp_clause)
 
 
@@ -79,16 +78,15 @@ async def impala_partition_query(
 async def hive_partition_query(
         start: datetime = Query(...,
                                 title='start',
-                                description='The start date time the time range should include, only all information '
-                                            'up to hour is used, so for example minutes and seconds are ignored.'),
+                                description='The start date of the time range.'),
         end: datetime = Query(...,
                               title='end',
-                              description='The end date time the time range should include, only all information up '
-                                          'to hour is used, so for example minutes and seconds are ignored. Must be '
-                                          '>= start.'),
+                              description='The start date of the time range. Must be >= start.'),
         generate_timestamp_clause: bool = Query(True,
                                                 title='Timestamp Clause',
                                                 description='If true not only create the partition range in the query '
                                                             'but also a timestamp clause based on the start and end '
-                                                            'date')):
+                                                            'date. If False every part after hour (minute, '
+                                                            'seconds) will not be covered by the partition (partitions '
+                                                            'are based on hours).')):
     return _process_impala_hive_partition_query(start, end, generate_timestamp_clause)
