@@ -40,6 +40,7 @@ def _process_impala_hive_partition_query(start: datetime, end: datetime, generat
     Args:
         start: Start time of the generated time query.
         end: End time of the generated time query.
+        generate_timestamp_clause: If true also generate a timestamp IN-clause for the given start and end.
 
     Returns:
         The QueryStringResponse containing the query partition range for the given start and end.
