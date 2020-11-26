@@ -1,6 +1,7 @@
 import logging
 
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
 from fastapi.logger import logger
 from prometheus_fastapi_instrumentator import Instrumentator
 
@@ -37,11 +38,7 @@ app.include_router(
 app.include_router(partition_range.router)
 
 
+# Show the docs under /
 @app.get("/")
 def root():
-    return {"FastAPI": "is awesome"}
-
-
-@app.get("/dummy")
-def dummy():
-    return {"hello": "dummy endpoint"}
+    return RedirectResponse('/docs')
