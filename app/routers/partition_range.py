@@ -32,7 +32,7 @@ def _process_impala_hive_partition_query(start: datetime, end: datetime, generat
         -> QueryStringResponse:
     """Process a call to the impala / hive endpoint.
 
-    This function will call the function generate_timerange_query to generate the query string. If further checks if
+    This function will call the function generate_timerange_query to generate the query string. It further checks if
     end >= start, if not it will raise a HTTPException with status code 422.
 
     It will response with an instance of QueryStringResponse.
