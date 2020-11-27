@@ -35,10 +35,7 @@ build: docker_clean
 	docker build -t $(DOCKER_IMAGE) .
 
 docker_serve: build
-	docker run --name $(DOCKER_CONTAINER) -p $(PORT):80 -e DEFAULT_TIMEZONE=UTC $(DOCKER_IMAGE)
-
-run_tests_docker: build
-	docker run -e DEFAULT_TIMEZONE=UTC $(DOCKER_IMAGE) python -m pytest /app/app/tests --cov app
+	docker run -it --name $(DOCKER_CONTAINER) -d -p $(PORT):80 -e DEFAULT_TIMEZONE=UTC $(DOCKER_IMAGE)
 
 RELEASE_VERSION:=$(shell head -n 1 ./VERSION)
 DOCKER_REPO_NAME:="repo2.rz.adition.net:5002"
