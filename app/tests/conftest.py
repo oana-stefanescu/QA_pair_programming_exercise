@@ -5,6 +5,6 @@ from .. import main
 
 
 @fixture(scope='session')
-def testing_client():
+def testing_client() -> TestClient:
     client = TestClient(main.app)
     return client
