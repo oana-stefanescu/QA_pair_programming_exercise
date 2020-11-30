@@ -48,7 +48,11 @@ tags_metadata: List[Dict[str, Union[str, Dict[str, str]]]] = [
             'description': 'Exporter documentation',
             'url': 'https://github.com/trallnag/prometheus-fastapi-instrumentator/',
         }
-    }
+    },
+    {
+        'name': 'queries',
+        'description': 'Generates queries for impala / hive'
+     }
 ]
 
 app = FastAPI(title=APP_NAME,
@@ -70,10 +74,10 @@ app.include_router(
     tags=['prometheus']
 )
 
-app.include_router(partition_range.router)
+app.include_router(partition_range.router, tags=['queries'])
 
 
 # Show the docs under /
-@app.get("/")
+@app.get("/", include_in_schema=False)
 def root():
     return RedirectResponse('/docs')
