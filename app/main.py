@@ -42,7 +42,7 @@ with open(description_file_path) as description_file:
 tags_metadata: List[Dict[str, Union[str, Dict[str, str]]]] = [
     {
         'name': 'prometheus',
-        'description': 'The prometheus endpoint, returns the prometheus metrics format. It uses the metrics from '
+        'description': 'The prometheus endpoint returns the prometheus metrics format. It uses the metrics from '
                        'prometheus-fastapi-instrumentator.',
         'externalDocs': {
             'description': 'Exporter documentation',
