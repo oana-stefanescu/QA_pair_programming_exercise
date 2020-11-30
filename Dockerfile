@@ -1,9 +1,14 @@
 FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8
 
-COPY ./app /app/app
+COPY ./app /app/app/
 COPY ./requirements.txt /app/
+# copy the meta info files
+COPY ./VERSION ./app_description.md /app/
 
-RUN cd /app/ && pip install --upgrade pip && pip install -r /app/requirements.txt
+# set environment variable for the app root (where the VERSION file etc. are stored)
+ENV APP_ROOT="/app"
+
+RUN cd /app/ && pip install --upgrade pip && pip install --index-url https://repo2.rz.adition.net/repository/bi-pipy/simple/ -r /app/requirements.txt
 
 # copy prestart script
 COPY docker/prestart.sh /app/prestart.sh

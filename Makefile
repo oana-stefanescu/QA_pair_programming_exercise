@@ -2,6 +2,7 @@
 
 VENV_PIP=./venv/bin/pip
 VENV_UVICORN=./venv/bin/uvicorn
+VENV_PYTHON=./venv/bin/python
 BI_PYPI=https://repo2.rz.adition.net/repository/bi-pipy/simple/
 DOCKER_IMAGE:=partitioning-service
 DOCKER_CONTAINER:=partitioning-service
@@ -11,13 +12,16 @@ PROMETHEUS_MULTIPROC_DIR:=./prometheus-tmp
 
 venv:
 	python3 -m venv ./venv
-	$(VENV_PIP) install --upgrade pip
-	$(VENV_PIP) install setuptools -U
+	$(VENV_PIP) install --index-url $(BI_PYPI) --upgrade pip
+	$(VENV_PIP) install --index-url $(BI_PYPI) setuptools -U
 	$(VENV_PIP) install --index-url $(BI_PYPI) -r requirements.txt
 
 serve:
 	./prepare_prometheus_multiprocess_local.sh
 	env prometheus_multiproc_dir="$(PROMETHEUS_MULTIPROC_DIR)" $(VENV_UVICORN) app.main:app --reload --port $(PORT) --host $(HOST) --log-level debug
+
+run_tests:
+	$(VENV_PYTHON) -m pytest app/tests --cov app
 
 docker_rm:
 	docker rm -f -v $(DOCKER_CONTAINER) || true
@@ -31,7 +35,10 @@ build: docker_clean
 	docker build -t $(DOCKER_IMAGE) .
 
 docker_serve: build
-	docker run -it --name $(DOCKER_CONTAINER) -d -p $(PORT):80 -e DEFAULT_TIMEZONE=UTC $(DOCKER_IMAGE)
+	docker run --name $(DOCKER_CONTAINER) -p $(PORT):80 -e DEFAULT_TIMEZONE=UTC $(DOCKER_IMAGE)
+
+run_tests_docker: build
+	docker run -e DEFAULT_TIMEZONE=UTC $(DOCKER_IMAGE) python -m pytest /app/app/tests --cov app
 
 RELEASE_VERSION:=$(shell head -n 1 ./VERSION)
 DOCKER_REPO_NAME:="repo2.rz.adition.net:5002"
