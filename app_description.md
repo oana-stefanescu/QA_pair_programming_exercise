@@ -1,4 +1,3 @@
-# partitioning-service
 This service is used to create Impala / Hive queries for a given time range.
 That is it can be used to create a query string to be used in the `WHERE` clause of a query to make use of the
 partitions for year, month, day and hour.
