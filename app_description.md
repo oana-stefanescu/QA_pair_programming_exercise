@@ -1,6 +1,7 @@
-This service is used to create Impala / Hive queries for a given time range.
+This service is used to create Impala / Hive query parts for a given time range.
 That is it can be used to create a query string to be used in the `WHERE` clause of a query to make use of the
 partitions for year, month, day and hour.
+It can also add the correct `timestamp` range to the query.
 
 # Dates and Times
 A datetime is always passed as a string in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601).
