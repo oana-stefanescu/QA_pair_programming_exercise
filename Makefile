@@ -55,7 +55,7 @@ release:
 	@echo "Building docker image"
 	docker build -t $(DOCKER_VERSIONED_IMAGE) -t $(DOCKER_LATEST_IMAGE) .
 	@echo "You need to be logged-in to $(DOCKER_REPO_NAME) in order to push images\n"
-	@printf "Going to push %s and %s\n" $(REVERSE_MAP_BUILDER_DOCKER_FILE) $(DOCKER_LATEST_IMAGE)
+	@printf "Going to push %s and %s\n" $(DOCKER_VERSIONED_IMAGE) $(DOCKER_LATEST_IMAGE)
 	docker login $(DOCKER_REPO_NAME)
 	docker push $(DOCKER_VERSIONED_IMAGE)
 	docker push $(DOCKER_LATEST_IMAGE)
