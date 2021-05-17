@@ -64,7 +64,7 @@ async def impala_partition_query(
         end: datetime = Query(...,
                               title='end',
                               description='The end date of the time range.'),
-        generate_timestamp_clause: bool = Query(True,
+        generate_timestamp_clause: bool = Query(False,
                                                 title='Timestamp Clause',
                                                 description='If true not only create the partition range in the query '
                                                             'but also a timestamp clause based on the start and end '
@@ -82,7 +82,7 @@ async def hive_partition_query(
         end: datetime = Query(...,
                               title='end',
                               description='The end date of the time range.'),
-        generate_timestamp_clause: bool = Query(True,
+        generate_timestamp_clause: bool = Query(False,
                                                 title='Timestamp Clause',
                                                 description='If true not only create the partition range in the query '
                                                             'but also a timestamp clause based on the start and end '
