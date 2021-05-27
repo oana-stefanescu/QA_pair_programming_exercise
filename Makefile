@@ -12,9 +12,9 @@ PROMETHEUS_MULTIPROC_DIR:=./prometheus-tmp
 
 venv:
 	python3 -m venv ./venv
-	$(VENV_PIP) install --index-url $(BI_PYPI) --upgrade pip
-	$(VENV_PIP) install --index-url $(BI_PYPI) setuptools -U
-	$(VENV_PIP) install --index-url $(BI_PYPI) -r requirements.txt
+	$(VENV_PIP) install --upgrade pip
+	$(VENV_PIP) install setuptools -U
+	$(VENV_PIP) install -r requirements.txt
 
 serve:
 	./prepare_prometheus_multiprocess_local.sh
